@@ -238,10 +238,9 @@ Stokes::assemble()
 
 
                   // Convection term: ((u^n · grad) u^{n+1}, v)
-                  cell_matrix(i, j) += (solution_old_values[q] * // u_n
-                          fe_values[velocity].gradient(j, q) * // grad u_{n+1}
-                          fe_values[velocity].value(i, q) // v
-                         ) * fe_values.JxW(q);
+                  cell_matrix(i, j) += (fe_values[velocity].gradient(j, q) * 
+                  solution_old_values[q]) * fe_values[velocity].value(i, q) * 
+                  fe_values.JxW(q);
 
             
 
@@ -425,8 +424,10 @@ Stokes::run()
   {
     setup();
 
-    VectorTools::interpolate(dof_handler, InletVelocity(), solution_owned);
-    solution = solution_owned;
+    Functions::ZeroFunction<dim> zero_initial(dim + 1);
+   VectorTools::interpolate(dof_handler, zero_initial, solution_owned);
+   solution = solution_owned;
+
 
     time            = 0.0;
     timestep_number = 0;
@@ -456,4 +457,186 @@ Stokes::run()
 
       output();
     }
+
+// Compute benchmark quantities and write them to file.
+      const double cD = compute_drag_coefficient();
+      const double cL = compute_lift_coefficient();
+      const double dP = compute_pressure_difference();
+      const double La = compute_recirculation_length();
+
+      std::ofstream out("benchmark_quantities.csv", std::ios::app);
+      out << timestep_number  << ","
+          << time << ","
+          << cD << ","
+          << cL << ","
+          << La << ","
+          << dP << '\n';
+
+  print_benchmark_quantities();
+
+}
+
+
+std::pair<double, double>
+Stokes::compute_drag_lift_forces() const
+{
+  FEFaceValues<dim> fe_face_values(*fe,
+                                   *quadrature_face,
+                                   update_values | update_gradients |
+                                     update_normal_vectors |
+                                     update_JxW_values);
+
+  FEValuesExtractors::Vector velocity(0);
+  FEValuesExtractors::Scalar pressure(dim);
+
+  const unsigned int n_q_face = quadrature_face->size();
+
+  std::vector<Tensor<1, dim>> velocity_values(n_q_face);
+  std::vector<Tensor<2, dim>> velocity_grads(n_q_face);
+  std::vector<double> pressure_values(n_q_face);
+
+  double drag = 0.0;
+  double lift = 0.0;
+
+  for (const auto &cell : dof_handler.active_cell_iterators())
+    {
+      if (!cell->is_locally_owned())
+        continue;
+
+      if (!cell->at_boundary())
+        continue;
+
+      for (unsigned int f = 0; f < cell->n_faces(); ++f)
+        {
+          if (!(cell->face(f)->at_boundary() && cell->face(f)->boundary_id() == 4))
+            continue;
+
+          fe_face_values.reinit(cell, f);
+
+          fe_face_values[velocity].get_function_values(solution, velocity_values);
+          fe_face_values[velocity].get_function_gradients(solution, velocity_grads);
+          fe_face_values[pressure].get_function_values(solution, pressure_values);
+
+               
+        for (unsigned int q = 0; q < n_q_face; ++q)
+        {
+          const Tensor<1, dim> n = fe_face_values.normal_vector(q);
+          const double p = pressure_values[q];
+          const Tensor<2, dim> grad_u = velocity_grads[q];
+
+          // Force exerted by fluid on the cylinder
+          // F = \int (p * n - rho * nu * grad_u * n) dS
+          const double dF_D = (p * n[0] - rho * nu * (grad_u[0] * n)) * fe_face_values.JxW(q);
+          const double dF_L = (p * n[1] - rho * nu * (grad_u[1] * n)) * fe_face_values.JxW(q);
+
+          drag += dF_D;
+          lift += dF_L;
+        }
+
+        }
+
+
+    }
+
+  // Sum contributions across MPI tasks.
+  const double drag_global = Utilities::MPI::sum(drag, MPI_COMM_WORLD);
+  const double lift_global = Utilities::MPI::sum(lift, MPI_COMM_WORLD);
+
+  return {drag_global, lift_global};
+}
+
+double
+Stokes::compute_drag_force() const
+{
+  return compute_drag_lift_forces().first;
+}
+
+double
+Stokes::compute_lift_force() const
+{
+  return compute_drag_lift_forces().second;
+}
+
+double
+Stokes::compute_drag_coefficient() const
+{
+  const double U = reference_velocity();
+  return 2.0 * compute_drag_force() / (rho * U * U * D_cylinder);
+}
+
+double
+Stokes::compute_lift_coefficient() const
+{
+  const double U = reference_velocity();
+  return 2.0 * compute_lift_force() / (rho * U * U * D_cylinder);
+}
+
+double
+Stokes::compute_pressure_difference() const
+{
+  // point_value() is the simplest option; use solution (ghosted vector).
+
+  Vector<double> values(dim + 1);
+
+
+  const Point<dim> p_front(x_front_cylinder, y_probe);
+  const Point<dim> p_back(x_back_cylinder, y_probe);
+
+  VectorTools::point_value(dof_handler, solution, p_front, values);
+  const double p_a = values[dim];
+
+  VectorTools::point_value(dof_handler, solution, p_back, values);
+  const double p_e = values[dim];
+
+  return p_a - p_e;
+}
+
+
+  double Stokes::compute_recirculation_length() const 
+{ 
+  // Standard numerical interpretation of x_r: 
+  // first zero crossing of u_x along y = 0.2 downstream of the cylinder. 
+  const unsigned int n_samples = 400; 
+  const double y = y_probe; 
+  auto u_x_at = [&](const double x) -> double { 
+      Vector<double> values(dim + 1); 
+      const Point<dim> p(x, y); 
+      VectorTools::point_value(dof_handler, solution, p, values); 
+      return values[0]; 
+  }; 
+
+  double x_prev = x_wake_start + 1e-6; 
+  double u_prev = u_x_at(x_prev); 
+  for (unsigned int k = 1; k <= n_samples; ++k) { 
+      const double x = x_wake_start + (x_wake_end - x_wake_start) * static_cast<double>(k) / n_samples; 
+      const double u = u_x_at(x); // Look for a sign change from negative to non-negative. 
+      if (u_prev < 0.0 && u >= 0.0) 
+      { 
+          const double xr = x_prev - u_prev * (x - x_prev) / (u - u_prev); 
+          return xr - x_back_cylinder; 
+      } 
+      x_prev = x; u_prev = u; 
+  } 
+  return std::numeric_limits<double>::quiet_NaN(); 
+}
+
+double
+Stokes::compute_reynolds_number() const
+{
+  const double U = reference_velocity();
+
+  return U * D_cylinder / nu;
+}
+
+void
+Stokes::print_benchmark_quantities() const
+{
+  pcout << std::fixed << std::setprecision(4);
+  
+  pcout << "Benchmark quantities at t = " << time << '\n';
+  pcout << "  Re = " << compute_reynolds_number() << '\n';
+  pcout << "  cD = " << compute_drag_coefficient() << '\n';
+  pcout << "  cL = " << compute_lift_coefficient() << '\n';
+  pcout << "  ΔP = " << compute_pressure_difference() << '\n';
+  pcout << "  La = " << compute_recirculation_length() << '\n';
 }
