@@ -1,6 +1,10 @@
 #ifndef STOKES_HPP
 #define STOKES_HPP
 
+#include <limits>
+#include <utility>
+#include <cmath>
+
 #include <deal.II/base/conditional_ostream.h>
 #include <deal.II/base/quadrature_lib.h>
 
@@ -277,6 +281,21 @@ protected:
   void
   output();
 
+  // Benchmark quantities.
+  std::pair<double, double> compute_drag_lift_forces() const;
+  double compute_drag_force() const;
+  double compute_lift_force() const;
+
+  double compute_drag_coefficient() const;
+  double compute_lift_coefficient() const;
+
+  double compute_pressure_difference() const;
+  double compute_recirculation_length() const;
+
+  double compute_reynolds_number() const;
+
+  void print_benchmark_quantities() const;
+
 protected:
   // MPI parallel. /////////////////////////////////////////////////////////////
 
@@ -291,16 +310,12 @@ protected:
 
   // Problem definition. ///////////////////////////////////////////////////////
 
- 
-
   // Kinematic viscosity [m2/s].
   const double nu = 0.001;
 
 
   // Outlet pressure [Pa]. (p_out)
   double h = 0.0;
-
-  
 
 
   // Discretization. ///////////////////////////////////////////////////////////
@@ -373,6 +388,31 @@ protected:
 
   // System solution (including ghost elements).
   TrilinosWrappers::MPI::BlockVector solution;
+
+  // Physical constants for the benchmark.
+  static constexpr double rho = 1.0;
+  static constexpr double D_cylinder = 0.1;
+
+  // 2D benchmark points.
+  static constexpr double x_front_cylinder = 0.15;
+  static constexpr double y_probe          = 0.20;
+  static constexpr double x_back_cylinder   = 0.25;
+
+  // Upstream profile: Um = 0.3 in the steady 2D-1 benchmark.
+  static constexpr double U_m = 0.3;
+
+  // Search interval for the recirculation zone.
+  // Change x_wake_end if our mesh outlet x-coordinate is different.
+  static constexpr double x_wake_start = x_back_cylinder;
+  static constexpr double x_wake_end   = 2.20;
+
+  double reference_velocity() const
+  {
+    // From the benchmark: U = 2 U(0,H/2,t) / 3.
+    return 2.0 * U_m / 3.0;
+  }
+
+
 };
 
 #endif
