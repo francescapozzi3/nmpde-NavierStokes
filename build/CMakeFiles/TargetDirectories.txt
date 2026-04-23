@@ -1,0 +1,3 @@
+/home/martinaarusconi/nmpde-NavierStokes/build/CMakeFiles/exercise-01.dir
+/home/martinaarusconi/nmpde-NavierStokes/build/CMakeFiles/edit_cache.dir
+/home/martinaarusconi/nmpde-NavierStokes/build/CMakeFiles/rebuild_cache.dir
