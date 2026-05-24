@@ -635,7 +635,8 @@ Stokes::compute_pressure_difference() const
 
   double Stokes::compute_recirculation_length() const 
 { 
-    const MappingFE<dim> mapping(*fe);
+   const FE_SimplexP<dim> fe_map(1);  
+  const MappingFE<dim>   mapping(fe_map);
   const unsigned int n_samples = 400; 
   const double y = y_probe; 
 
@@ -658,13 +659,15 @@ Stokes::compute_pressure_difference() const
   double x_prev = x_wake_start + 1e-6; 
   double u_prev = u_x_at(x_prev); 
   for (unsigned int k = 1; k <= n_samples; ++k) { 
-    const double x = x_wake_start + (x_wake_end - x_wake_start) 
-                     * static_cast<double>(k) / n_samples; 
+   const double x =
+        (x_back_cylinder + 0.005) +
+        (x_wake_end - (x_back_cylinder + 0.005)) * static_cast<double>(k) / n_samples;
     const double u = u_x_at(x);
+
     if (u_prev < 0.0 && u >= 0.0) 
     { 
       const double xr = x_prev - u_prev * (x - x_prev) / (u - u_prev); 
-      return xr - x_back_cylinder; 
+      return xr - x_back_cylinder; // La = xr - 0.25
     } 
     x_prev = x; 
     u_prev = u; 
