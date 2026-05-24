@@ -599,31 +599,28 @@ Stokes::compute_lift_coefficient() const
 double
 Stokes::compute_pressure_difference() const
 {
-  const MappingFE<dim> mapping(*fe);
+  const FE_SimplexP<dim> fe_map(1);
+  const MappingFE<dim>   mapping(fe_map);
 
   const FEValuesExtractors::Scalar pressure(dim);
 
   auto get_pressure_at_point = [&](const Point<dim> &p) -> double
   {
     double local_value = 0.0;
-    bool   found       = false;
 
     try
       {
         Vector<double> values(fe->n_components());
         VectorTools::point_value(mapping, dof_handler, solution, p, values);
         local_value = values(dim); // componente pressione
-        found       = true;
       }
     catch (const VectorTools::ExcPointNotAvailableHere &)
       {
-        // Il punto non è disponibile su questo processo: local_value rimane 0.0
-        // e found rimane false.
+          // This process does not own the point.
       }
 
-    // Somma tra tutti i processi: solo uno avrà found=true
-    double global_value = Utilities::MPI::sum(local_value, MPI_COMM_WORLD);
-    return global_value;
+         return Utilities::MPI::sum(local_value, MPI_COMM_WORLD);
+
   };
 
   const Point<dim> p_front(x_front_cylinder, y_probe);
