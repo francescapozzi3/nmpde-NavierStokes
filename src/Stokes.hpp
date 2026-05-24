@@ -134,8 +134,8 @@ protected:
     vmult(TrilinosWrappers::MPI::BlockVector       &dst,
           const TrilinosWrappers::MPI::BlockVector &src) const
     {
-      SolverControl                              solver_control_velocity(1000,
-                                            1e-3 * src.block(0).l2_norm());
+      SolverControl                              solver_control_velocity(2000,
+                                            1e-6 * src.block(0).l2_norm());
       SolverGMRES<TrilinosWrappers::MPI::Vector> solver_gmres_velocity(
       solver_control_velocity);
       solver_gmres_velocity.solve(*velocity_stiffness,

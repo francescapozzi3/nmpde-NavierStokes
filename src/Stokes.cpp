@@ -360,9 +360,13 @@ Stokes::solve()
 {
   pcout << "===============================================" << std::endl;
 
-  SolverControl solver_control(10000, 1e-4 * system_rhs.l2_norm());
+  //SolverControl solver_control(10000, 1e-4 * system_rhs.l2_norm());
+  //SolverGMRES<TrilinosWrappers::MPI::BlockVector> solver(solver_control);
+
   
-  SolverGMRES<TrilinosWrappers::MPI::BlockVector> solver(solver_control);
+  SolverControl solver_control(20000, 1e-6 * system_rhs.l2_norm());
+  
+  SolverFGMRES<TrilinosWrappers::MPI::BlockVector> solver(solver_control);
 
  /* PreconditionBlockDiagonal preconditioner;
   preconditioner.initialize(system_matrix.block(0, 0),
@@ -574,21 +578,40 @@ Stokes::compute_lift_coefficient() const
 double
 Stokes::compute_pressure_difference() const
 {
-  // point_value() is the simplest option; use solution (ghosted vector).
+  const MappingFE<dim> mapping(*fe);
 
-  Vector<double> values(dim + 1);
+  const FEValuesExtractors::Scalar pressure(dim);
 
+  auto get_pressure_at_point = [&](const Point<dim> &p) -> double
+  {
+    double local_value = 0.0;
+    bool   found       = false;
+
+    try
+      {
+        Vector<double> values(fe->n_components());
+        VectorTools::point_value(mapping, dof_handler, solution, p, values);
+        local_value = values(dim); // componente pressione
+        found       = true;
+      }
+    catch (const VectorTools::ExcPointNotAvailableHere &)
+      {
+        // Il punto non è disponibile su questo processo: local_value rimane 0.0
+        // e found rimane false.
+      }
+
+    // Somma tra tutti i processi: solo uno avrà found=true
+    double global_value = Utilities::MPI::sum(local_value, MPI_COMM_WORLD);
+    return global_value;
+  };
 
   const Point<dim> p_front(x_front_cylinder, y_probe);
-  const Point<dim> p_back(x_back_cylinder, y_probe);
+  const Point<dim> p_back(x_back_cylinder,   y_probe);
 
-  VectorTools::point_value(dof_handler, solution, p_front, values);
-  const double p_a = values[dim];
+  const double p1 = get_pressure_at_point(p_front);
+  const double p2 = get_pressure_at_point(p_back);
 
-  VectorTools::point_value(dof_handler, solution, p_back, values);
-  const double p_e = values[dim];
-
-  return p_a - p_e;
+  return p1 - p2;
 }
 
 
