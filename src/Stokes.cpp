@@ -522,19 +522,40 @@ Stokes::compute_drag_lift_forces() const
           fe_face_values[pressure].get_function_values(solution, pressure_values);
 
                
-        for (unsigned int q = 0; q < n_q_face; ++q)
-        {
-          const Tensor<1, dim> n = fe_face_values.normal_vector(q);
-          const double p = pressure_values[q];
-          const Tensor<2, dim> grad_u = velocity_grads[q];
+         for (unsigned int q = 0; q < n_q_face; ++q)
+            {
+              // n_out = normale uscente dal dominio.
+              // Sul cilindro è diretta verso l'interno del solido, quindi la invertiamo
+              // per ottenere la normale uscente dal cilindro.
+              const Tensor<1, dim> n = -fe_face_values.normal_vector(q);
 
-          // Force exerted by fluid on the cylinder
-          // F = \int (p * n - rho * nu * grad_u * n) dS
-          const double dF_D = (p * n[0] - rho * nu * (grad_u[0] * n)) * fe_face_values.JxW(q);
-          const double dF_L = (p * n[1] - rho * nu * (grad_u[1] * n)) * fe_face_values.JxW(q);
+              // t = (ny, -nx)
+              Tensor<1, dim> t;
+              t[0] =  n[1];
+              t[1] = -n[0];
 
-          drag += dF_D;
-          lift += dF_L;
+              // ∂v_t/∂n = n · ∇(u · t)
+              // = Σ_i Σ_j n_i (∂u_j/∂x_i) t_j
+              double dvt_dn = 0.0;
+              for (unsigned int i = 0; i < dim; ++i)
+                for (unsigned int j = 0; j < dim; ++j)
+                  dvt_dn += n[i] * velocity_grads[q][j][i] * t[j];
+
+              // p = pressione nel punto di quadratura.
+              const double p = pressure_values[q];
+
+              // FD = ∫ (ρν ∂v_t/∂n * ny - p * nx) dS
+              const double dF_D =
+                (data.rho * data.nu * dvt_dn * n[1] - p * n[0]) *
+                fe_face_values.JxW(q);
+
+              // FL = -∫ (ρν ∂v_t/∂n * nx + p * ny) dS
+              const double dF_L =
+                -(data.rho * data.nu * dvt_dn * n[0] + p * n[1]) *
+                fe_face_values.JxW(q);
+
+              drag += dF_D;
+              lift += dF_L;
         }
 
         }
