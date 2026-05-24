@@ -134,8 +134,7 @@ protected:
     vmult(TrilinosWrappers::MPI::BlockVector       &dst,
           const TrilinosWrappers::MPI::BlockVector &src) const
     {
-      SolverControl                              solver_control_velocity(2000,
-                                            1e-6 * src.block(0).l2_norm());
+      SolverControl solver_control_velocity(2000, 1e-3 * src.block(0).l2_norm());
       SolverGMRES<TrilinosWrappers::MPI::Vector> solver_gmres_velocity(
       solver_control_velocity);
       solver_gmres_velocity.solve(*velocity_stiffness,
@@ -143,8 +142,7 @@ protected:
                                 src.block(0),
                                 preconditioner_velocity);
 
-      SolverControl                           solver_control_pressure(1000,
-                                            1e-3 * src.block(1).l2_norm());
+      SolverControl solver_control_pressure(2000, 1e-3 * src.block(1).l2_norm());
       SolverCG<TrilinosWrappers::MPI::Vector> solver_cg_pressure(
         solver_control_pressure);
       solver_cg_pressure.solve(*pressure_mass,
@@ -192,8 +190,7 @@ protected:
     vmult(TrilinosWrappers::MPI::BlockVector       &dst,
           const TrilinosWrappers::MPI::BlockVector &src) const
     {
-      SolverControl solver_control_velocity(1000,
-                                      1e-3 * src.block(0).l2_norm());
+      SolverControl solver_control_velocity(2000, 1e-3 * src.block(0).l2_norm());
 
     SolverGMRES<TrilinosWrappers::MPI::Vector> solver_gmres_velocity(
     solver_control_velocity);
@@ -207,8 +204,7 @@ protected:
       B->vmult(tmp, dst.block(0));
       tmp.sadd(-1.0, src.block(1));
 
-      SolverControl                           solver_control_pressure(1000,
-                                            1e-3 * src.block(1).l2_norm());
+      SolverControl solver_control_pressure(2000, 1e-3 * src.block(1).l2_norm());
       SolverCG<TrilinosWrappers::MPI::Vector> solver_cg_pressure(
         solver_control_pressure);
       solver_cg_pressure.solve(*pressure_mass,

@@ -12,7 +12,7 @@ main(int argc, char *argv[])
   const std::string  mesh_file_name  = "../mesh/mesh-2D-cylinder-circular-cs-0.0205.msh";
   const unsigned int degree_velocity = 2;
   const unsigned int degree_pressure = 1;
-  const double T = 1;
+  const double T = 10.0;
   const double theta = 1.0;
   const double delta_t = 0.01;
 

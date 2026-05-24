@@ -237,8 +237,8 @@ Stokes::assemble()
                     fe_values.JxW(q);
 
 
-                  // Convection term: ((u^n · grad) u^{n+1}, v)
-                  cell_matrix(i, j) += (fe_values[velocity].gradient(j, q) * 
+                  // Convection term: theta* ((u^n · grad) u^{n+1}, v)
+                  cell_matrix(i, j) += theta * (fe_values[velocity].gradient(j, q) * 
                   solution_old_values[q]) * fe_values[velocity].value(i, q) * 
                   fe_values.JxW(q);
 
@@ -281,7 +281,14 @@ Stokes::assemble()
               cell_rhs(i) +=  (theta * f_new_loc + (1.0 - theta) * f_old_loc) *                      //
                              fe_values[velocity].value(i, q) * //
                              fe_values.JxW(q);
+              
+              // Convection term: (1-theta) * ((u^n · grad) u^n, v)
+              const Tensor<1, dim> conv_old =
+                solution_old_grads[q] * solution_old_values[q];
 
+              cell_rhs(i) -= (1.0 - theta) *
+                            (conv_old * fe_values[velocity].value(i, q)) *
+                            fe_values.JxW(q);
 
             }
         }
@@ -334,6 +341,7 @@ Stokes::assemble()
     std::map<types::boundary_id, const Function<dim> *> boundary_functions;
     
     InletVelocity inlet;
+    inlet.set_time(time);
     Functions::ZeroFunction<dim> zero_function(dim + 1);
  
 
@@ -364,8 +372,7 @@ Stokes::solve()
   //SolverGMRES<TrilinosWrappers::MPI::BlockVector> solver(solver_control);
 
   
-  SolverControl solver_control(20000, 1e-6 * system_rhs.l2_norm());
-  
+  SolverControl solver_control(20000, 1e-4 * system_rhs.l2_norm());
   SolverFGMRES<TrilinosWrappers::MPI::BlockVector> solver(solver_control);
 
  /* PreconditionBlockDiagonal preconditioner;
