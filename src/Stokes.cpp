@@ -617,30 +617,41 @@ Stokes::compute_pressure_difference() const
 
   double Stokes::compute_recirculation_length() const 
 { 
-  // Standard numerical interpretation of x_r: 
-  // first zero crossing of u_x along y = 0.2 downstream of the cylinder. 
+    const MappingFE<dim> mapping(*fe);
   const unsigned int n_samples = 400; 
   const double y = y_probe; 
+
   auto u_x_at = [&](const double x) -> double { 
-      Vector<double> values(dim + 1); 
-      const Point<dim> p(x, y); 
-      VectorTools::point_value(dof_handler, solution, p, values); 
-      return values[0]; 
+    double local_value = 0.0;
+    try
+      {
+        Vector<double> values(fe->n_components()); 
+        const Point<dim> p(x, y); 
+        VectorTools::point_value(mapping, dof_handler, solution, p, values); 
+        local_value = values[0];
+      }
+    catch (const VectorTools::ExcPointNotAvailableHere &)
+      {
+        // Il punto non è su questo processo, ok
+      }
+    return Utilities::MPI::sum(local_value, MPI_COMM_WORLD);
   }; 
 
   double x_prev = x_wake_start + 1e-6; 
   double u_prev = u_x_at(x_prev); 
   for (unsigned int k = 1; k <= n_samples; ++k) { 
-      const double x = x_wake_start + (x_wake_end - x_wake_start) * static_cast<double>(k) / n_samples; 
-      const double u = u_x_at(x); // Look for a sign change from negative to non-negative. 
-      if (u_prev < 0.0 && u >= 0.0) 
-      { 
-          const double xr = x_prev - u_prev * (x - x_prev) / (u - u_prev); 
-          return xr - x_back_cylinder; 
-      } 
-      x_prev = x; u_prev = u; 
+    const double x = x_wake_start + (x_wake_end - x_wake_start) 
+                     * static_cast<double>(k) / n_samples; 
+    const double u = u_x_at(x);
+    if (u_prev < 0.0 && u >= 0.0) 
+    { 
+      const double xr = x_prev - u_prev * (x - x_prev) / (u - u_prev); 
+      return xr - x_back_cylinder; 
+    } 
+    x_prev = x; 
+    u_prev = u; 
   } 
-  return std::numeric_limits<double>::quiet_NaN(); 
+  return std::numeric_limits<double>::quiet_NaN();
 }
 
 double
