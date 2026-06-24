@@ -46,50 +46,61 @@ public:
   // Physical dimension (1D, 2D, 3D)
   static constexpr unsigned int dim = 2;
 
+    struct ProblemData
+  {
+    double nu  = 0.001;
+    double rho = 1.0;
+
+    double Um = 0.0;
+
+    unsigned int choice = 1;
+
+    // Forcing term
+    std::function<Tensor<1, dim>(const Point<dim> &, const double &)> f;
+
+    // Neumann BC on outlet
+    std::function<Tensor<1, dim>(const Point<dim> &, const double &)> h;
+
+    // Inlet profile
+    std::function<Tensor<1, dim>(const Point<dim> &, const double &)> u_in;
+
+    // Initial condition
+    std::function<Tensor<1, dim>(const Point<dim> &)> u0;
+  };
+
+
   // Function for inlet velocity. This actually returns an object with four
   // components (one for each velocity component, and one for the pressure), but
   // then only the first three are really used (see the component mask when
   // applying boundary conditions at the end of assembly). If we only return
   // three components, however, we may get an error message due to this function
   // being incompatible with the finite element space.
-  class InletVelocity : public Function<dim>
-  {
-  public:
-    InletVelocity()
-      : Function<dim>(dim + 1)
-    {}
+   class InletVelocity : public Function<dim>
+{
+public:
+  InletVelocity(const std::function<Tensor<1, dim>(const Point<dim> &, const double &)> &fun)
+    : Function<dim>(dim + 1)
+    , fun(fun)
+  {}
 
-    virtual void
-  vector_value(const Point<dim> &p, Vector<double> &values) const override
-  {
-    const double y = p[1];
-    const double u_in = 4.0 * alpha * y * (H - y) / (H * H);
-
-    values[0] = u_in;   // velocity x
-    values[1] = 0.0;    // velocity y
-
-    for (unsigned int i = 2; i < dim + 1; ++i)
-      values[i] = 0.0;  // pressure component (and any extra, if present)
+  void set_time(const double t) override
+   { 
+    time = t; 
   }
 
-  virtual double
-  value(const Point<dim> &p, const unsigned int component = 0) const override
+  void vector_value(const Point<dim> &p, Vector<double> &values) const override
   {
-    const double y = p[1];
-    const double u_in = 4.0 * alpha * y * (H - y) / (H * H);
+    const Tensor<1, dim> u = fun(p, time);
 
-    if (component == 0)
-      return u_in;
-    else
-      return 0.0;
+    values = 0.0;
+    for (unsigned int d = 0; d < dim; ++d)
+      values[d] = u[d];
   }
 
-protected:
-  const double alpha = 0.3;
-  const double H     = 0.41;
-
-  };
-
+private:
+  std::function<Tensor<1, dim>(const Point<dim> &, const double &)> fun;
+  double time = 0.0;
+};
 
 
   // Since we're working with block matrices, we need to make our own
@@ -235,14 +246,14 @@ protected:
   };
 
 
-  // Constructor.
+ // Constructor.
   Stokes(const std::string  &mesh_file_name_,
          const unsigned int &degree_velocity_,
          const unsigned int &degree_pressure_,
          const double                                    &T_,
        const double                                    &theta_,
        const double                                    &delta_t_,
-      const std::function<Tensor<1, dim>(const Point<dim> &, const double &)> &f_)
+      const ProblemData &problem_data_)
     : mpi_size(Utilities::MPI::n_mpi_processes(MPI_COMM_WORLD))
     , mpi_rank(Utilities::MPI::this_mpi_process(MPI_COMM_WORLD))
     , pcout(std::cout, mpi_rank == 0)
@@ -252,7 +263,7 @@ protected:
     , T(T_)
     , theta(theta_)
     , delta_t(delta_t_)
-    , f(f_)
+    , data(problem_data_)
     , mesh(MPI_COMM_WORLD)
   {}
 // Run the time-dependent simulation.
@@ -304,14 +315,11 @@ protected:
   // Parallel output stream.
   ConditionalOStream pcout;
 
+  double cD_max = 0.0;
+  double cL_max = 0.0;
+
   // Problem definition. ///////////////////////////////////////////////////////
 
-  // Kinematic viscosity [m2/s].
-  const double nu = 0.001;
-
-
-  // Outlet pressure [Pa]. (p_out)
-  double h = 0.0;
 
 
   // Discretization. ///////////////////////////////////////////////////////////
@@ -333,10 +341,9 @@ protected:
   // Time step.
   const double delta_t;
 
-   // Forcing term.
-  std::function<Tensor<1, dim>(const Point<dim> &, const double &)> f;
+  // Data for the problem.
+  ProblemData data;
 
-  
   // Current time.
   double time = 0.0;
 
@@ -385,7 +392,7 @@ protected:
   // System solution (including ghost elements).
   TrilinosWrappers::MPI::BlockVector solution;
 
-  // Physical constants for the benchmark.
+ // Physical constants for the benchmark.
   static constexpr double rho = 1.0;
   static constexpr double D_cylinder = 0.1;
 
@@ -394,19 +401,17 @@ protected:
   static constexpr double y_probe          = 0.20;
   static constexpr double x_back_cylinder   = 0.25;
 
-  // Upstream profile: Um = 0.3 in the steady 2D-1 benchmark.
-  static constexpr double U_m = 0.3;
-
   // Search interval for the recirculation zone.
-  // Change x_wake_end if our mesh outlet x-coordinate is different.
+  // Change x_wake_end if your mesh outlet x-coordinate is different.
   static constexpr double x_wake_start = x_back_cylinder;
   static constexpr double x_wake_end   = 2.20;
 
   double reference_velocity() const
   {
     // From the benchmark: U = 2 U(0,H/2,t) / 3.
-    return 2.0 * U_m / 3.0;
+    return 2.0 * data.Um / 3.0;
   }
+
 
 
 };
