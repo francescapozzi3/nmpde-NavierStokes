@@ -214,8 +214,8 @@ Stokes::assemble()
         {
 
           
-           const Tensor<1, dim> f_old_loc = f(fe_values.quadrature_point(q), time - delta_t);
-           const Tensor<1, dim> f_new_loc = f(fe_values.quadrature_point(q), time);
+           const Tensor<1, dim> f_old_loc = data.f(fe_values.quadrature_point(q), time - delta_t);
+           const Tensor<1, dim> f_new_loc = data.f(fe_values.quadrature_point(q), time);
 
 
           for (unsigned int i = 0; i < dofs_per_cell; ++i)
@@ -223,7 +223,7 @@ Stokes::assemble()
               for (unsigned int j = 0; j < dofs_per_cell; ++j)
                 {
 
-                 // Time derivative: (1/dt) (u^{n+1}, v)
+                  // Time derivative: (1/dt) (u^{n+1}, v)
                   cell_matrix(i, j) += (1.0 / delta_t) *             //
                                        fe_values[velocity].value(i, q) * //
                                        fe_values[velocity].value(j, q) * //
@@ -231,19 +231,23 @@ Stokes::assemble()
 
                   // Viscosity term: nu * theta * (grad u^{n+1}, grad v)
                   cell_matrix(i, j) +=
-                    nu * theta *
+                    data.nu * theta *
                     scalar_product(fe_values[velocity].gradient(i, q),
                                    fe_values[velocity].gradient(j, q)) *
                     fe_values.JxW(q);
 
 
-                  // Convection term: theta* ((u^n · grad) u^{n+1}, v)
-                  cell_matrix(i, j) += theta * (fe_values[velocity].gradient(j, q) * 
-                  solution_old_values[q]) * fe_values[velocity].value(i, q) * 
-                  fe_values.JxW(q);
-
-            
-
+                  // Convection term: ((u^n · grad) u^{n+1}, v)
+                 /* cell_matrix(i, j) += (solution_old_values[q] * // u_n
+                          fe_values[velocity].gradient(j, q) * // grad u_{n+1}
+                          fe_values[velocity].value(i, q) // v
+                         ) * fe_values.JxW(q);
+                         // Convection term: ((u^n \cdot grad) u^{n+1}, v)
+                  */
+                  cell_matrix(i, j) += theta *
+                  (fe_values[velocity].gradient(j, q) * solution_old_values[q]) 
+                  * fe_values[velocity].value(i, q) 
+                  * fe_values.JxW(q);
 
                  // Pressure term in the momentum equation: -(p^{n+1}, div v)
                   cell_matrix(i, j) -= fe_values[velocity].divergence(i, q) *
@@ -257,22 +261,21 @@ Stokes::assemble()
 
 
                   // Pressure mass matrix
-                   cell_pressure_mass_matrix(i, j) += (nu + (1.0 / delta_t)) *
+                   cell_pressure_mass_matrix(i, j) += (data.nu + (1.0 / delta_t)) *
                     fe_values[pressure].value(i, q) *
                     fe_values[pressure].value(j, q) *
                     fe_values.JxW(q);
-                 
-               
+                
                   }
 
-                 // Time derivative: (1/dt)(u^n, v)
+                 / Time derivative: (1/dt)(u^n, v)
                   cell_rhs(i) += (1.0 / delta_t) *             //
                              fe_values[velocity].value(i, q) * //
                              solution_old_values[q] *      //
                              fe_values.JxW(q);
 
                   // - nu (1-theta) (grad u^n, grad v)
-                  cell_rhs(i) -= (1.0 - theta) * nu *                   //
+                  cell_rhs(i) -= (1.0 - theta) * data.nu *                   //
                              scalar_product(fe_values[velocity].gradient(i, q), //
                                             solution_old_grads[q]) *    //
                              fe_values.JxW(q);
@@ -282,13 +285,14 @@ Stokes::assemble()
                              fe_values[velocity].value(i, q) * //
                              fe_values.JxW(q);
               
-              // Convection term: (1-theta) * ((u^n · grad) u^n, v)
+               // RHS convection explicit part
               const Tensor<1, dim> conv_old =
                 solution_old_grads[q] * solution_old_values[q];
 
               cell_rhs(i) -= (1.0 - theta) *
                             (conv_old * fe_values[velocity].value(i, q)) *
                             fe_values.JxW(q);
+                      
 
             }
         }
@@ -307,17 +311,16 @@ Stokes::assemble()
                   for (unsigned int q = 0; q < n_q_face; ++q)
                     {
                     //const Tensor<1, dim> h_val = h(fe_face_values.quadrature_point(q), time);
-                     
+                   const Tensor<1, dim> h_val = data.h(fe_face_values.quadrature_point(q), time);
+
                     for (unsigned int i = 0; i < dofs_per_cell; ++i)
                         {
                           // mettere h_val al posto di h e quest0
                           //cell_rhs(i) += (h_val * fe_face_values[velocity].value(i, q)) * fe_face_values.JxW(q);
 
-                          cell_rhs(i) +=
-                            -h *
-                            scalar_product(fe_face_values.normal_vector(q),
-                                           fe_face_values[velocity].value(i, q)) *
-                            fe_face_values.JxW(q);
+                           cell_rhs(i) += scalar_product(h_val,
+                              fe_face_values[velocity].value(i, q)) *
+                              fe_face_values.JxW(q);
                         }
                     }
                 }
