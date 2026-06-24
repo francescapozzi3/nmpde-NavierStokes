@@ -468,8 +468,25 @@ Stokes::run()
       // Perform parallel communication to update the ghost values of the
       // solution vector.
       solution = solution_owned;
+      
+    if (timestep_number % 10 == 0)
+        { 
+          output();
+        }
 
-      output();
+      // ONLY for benchmark case 2D-2:  
+      if (data.choice == 2)
+      {
+        const double cD = compute_drag_coefficient();
+        const double cL = compute_lift_coefficient();
+
+        cD_max = std::max(cD_max, std::abs(cD));  // usa abs!
+        cL_max = std::max(cL_max, std::abs(cL));
+      }
+
+
+      //output();
+
     }
 
 // Compute benchmark quantities and write them to file.
