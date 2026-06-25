@@ -268,7 +268,7 @@ Stokes::assemble()
                 
                   }
 
-                 / Time derivative: (1/dt)(u^n, v)
+                 // Time derivative: (1/dt)(u^n, v)
                   cell_rhs(i) += (1.0 / delta_t) *             //
                              fe_values[velocity].value(i, q) * //
                              solution_old_values[q] *      //
@@ -343,7 +343,7 @@ Stokes::assemble()
     std::map<types::global_dof_index, double>           boundary_values;
     std::map<types::boundary_id, const Function<dim> *> boundary_functions;
     
-    InletVelocity inlet;
+    InletVelocity inlet(data.u_in);
     inlet.set_time(time);
     Functions::ZeroFunction<dim> zero_function(dim + 1);
  
@@ -468,7 +468,7 @@ Stokes::run()
       // Perform parallel communication to update the ghost values of the
       // solution vector.
       solution = solution_owned;
-      
+
     if (timestep_number % 10 == 0)
         { 
           output();
@@ -707,7 +707,7 @@ Stokes::compute_reynolds_number() const
 {
   const double U = reference_velocity();
 
-  return U * D_cylinder / nu;
+  return U * D_cylinder / data.nu;
 }
 
 void
@@ -717,8 +717,19 @@ Stokes::print_benchmark_quantities() const
   
   pcout << "Benchmark quantities at t = " << time << '\n';
   pcout << "  Re = " << compute_reynolds_number() << '\n';
+  if (data.choice == 2)
+  {
+    pcout << "  cD_max = " << cD_max << '\n';
+    pcout << "  cL_max = " << cL_max << '\n';
+  }
+  else
+  {
   pcout << "  cD = " << compute_drag_coefficient() << '\n';
   pcout << "  cL = " << compute_lift_coefficient() << '\n';
-  pcout << "  ΔP = " << compute_pressure_difference() << '\n';
+  }
+ pcout << "  ΔP = " << compute_pressure_difference() << '\n';
+  if(data.choice == 1)
+  {
   pcout << "  La = " << compute_recirculation_length() << '\n';
+  }
 }
