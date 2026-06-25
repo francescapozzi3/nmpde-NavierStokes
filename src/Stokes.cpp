@@ -754,6 +754,41 @@ Stokes::compute_strouhal_number() const
   return D_cylinder * f / U;
 }
 
+double
+Stokes::compute_delta_p_at_half_period() const
+{
+  if (dP_history.empty() || cL_history.empty())
+    return std::numeric_limits<double>::quiet_NaN();
+
+  // Trova t0 = tempo del massimo di cL
+  const auto it_max = std::max_element(cL_history.begin(), cL_history.end());
+  const double t0   = time_history[std::distance(cL_history.begin(), it_max)];
+
+  // Calcola il mezzo periodo da St
+  const double St = compute_strouhal_number();
+  if (std::isnan(St))
+    return std::numeric_limits<double>::quiet_NaN();
+
+  const double U           = reference_velocity();
+  const double half_period = D_cylinder / (2.0 * St * U);
+  const double target      = t0 + half_period;
+
+  // Trova il punto nella storia più vicino a target
+  double best_dp   = std::numeric_limits<double>::quiet_NaN();
+  double best_dist = std::numeric_limits<double>::max();
+  for (unsigned int i = 0; i < time_history.size(); ++i)
+    {
+      const double d = std::abs(time_history[i] - target);
+      if (d < best_dist)
+        {
+          best_dist = d;
+          best_dp   = dP_history[i];
+        }
+    }
+  return best_dp;
+}
+
+
 
 void
 Stokes::print_benchmark_quantities() const
@@ -762,19 +797,28 @@ Stokes::print_benchmark_quantities() const
   
   pcout << "Benchmark quantities at t = " << time << '\n';
   pcout << "  Re = " << compute_reynolds_number() << '\n';
+  
   if (data.choice == 2)
   {
     pcout << "  cD_max = " << cD_max << '\n';
     pcout << "  cL_max = " << cL_max << '\n';
+    pcout << "  St     = " << compute_strouhal_number() << '\n';
+    pcout << "  ΔP(t0+T/2) = " << compute_delta_p_at_half_period() << '\n'; 
+
   }
+
+  else if (data.choice == 3)
+  {
+   pcout << "  cD_max = " << cD_max << '\n';
+   pcout << "  cL_max = " << cL_max << '\n';
+   pcout << "  DeltaP(8) = " << compute_pressure_difference() << '\n';
+  }
+
   else
   {
-  pcout << "  cD = " << compute_drag_coefficient() << '\n';
-  pcout << "  cL = " << compute_lift_coefficient() << '\n';
-  }
- pcout << "  ΔP = " << compute_pressure_difference() << '\n';
-  if(data.choice == 1)
-  {
-  pcout << "  La = " << compute_recirculation_length() << '\n';
+    pcout << "  cD = " << compute_drag_coefficient() << '\n';
+    pcout << "  cL = " << compute_lift_coefficient() << '\n';
+    pcout << "  ΔP = " << compute_pressure_difference() << '\n';
+    pcout << "  La = " << compute_recirculation_length() << '\n';
   }
 }

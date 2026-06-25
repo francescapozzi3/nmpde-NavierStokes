@@ -301,6 +301,7 @@ private:
 
   double compute_strouhal_number() const;
 
+  double compute_delta_p_at_half_period() const;
 
   double compute_reynolds_number() const;
 
@@ -321,6 +322,8 @@ protected:
   double cD_max = 0.0;
   double cL_max = 0.0;
 
+  std::vector<double> cL_history;
+  std::vector<double> cD_history;
   std::vector<double> time_history;
   std::vector<double> dP_history;
 
