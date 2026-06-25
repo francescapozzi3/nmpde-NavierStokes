@@ -438,10 +438,9 @@ Stokes::run()
   {
     setup();
 
-    Functions::ZeroFunction<dim> zero_initial(dim + 1);
+   Functions::ZeroFunction<dim> zero_initial(dim + 1);
    VectorTools::interpolate(dof_handler, zero_initial, solution_owned);
    solution = solution_owned;
-
 
     time            = 0.0;
     timestep_number = 0;
@@ -474,46 +473,108 @@ Stokes::run()
           output();
         }
 
-      // ONLY for benchmark case 2D-2:  
-      if (data.choice == 2)
+        if (data.choice == 2 || data.choice == 3)
       {
         const double cD = compute_drag_coefficient();
         const double cL = compute_lift_coefficient();
+        const double dP = compute_pressure_difference();
 
-        if (time > 3.0)
-         {
-        cD_max = std::max(cD_max, std::abs(cD));  // usa abs!
-        cL_max = std::max(cL_max, std::abs(cL));
-         }
+        cD_history.push_back(cD);
+        cL_history.push_back(cL);
+        dP_history.push_back(dP);
+        time_history.push_back(time);
+
+        if (data.choice == 2)
+        {
+            if (time > 15.0)
+            {
+                cD_max = std::max(cD_max,std::abs(cD));
+                cL_max = std::max(cL_max,std::abs(cL));
+            }
+        }
+
+        if (data.choice == 3)
+        {
+            cD_max = std::max(cD_max,std::abs(cD));
+            cL_max = std::max(cL_max,std::abs(cL));
+        }
       }
-
-       if (data.choice == 3)
-      {
-        // Stampa solo alla fine
-        if (std::abs(time - T) < 0.5 * delta_t)
-          {
-            pcout << "  ΔP(t=8) = " << compute_pressure_difference() << '\n';
-          }
-      }
-
 
       //output();
 
     }
+ //Write them to file.
+     if (Utilities::MPI::this_mpi_process(MPI_COMM_WORLD) == 0)
+  {
+    std::ofstream out("benchmark_quantities.csv");
 
-// Compute benchmark quantities and write them to file.
-      const double cD = compute_drag_coefficient();
-      const double cL = compute_lift_coefficient();
-      const double dP = compute_pressure_difference();
-      const double La = compute_recirculation_length();
+    if (data.choice == 1)
+    {
+        out << "Re,cD,cL,La,DeltaP\n";
 
-      std::ofstream out("benchmark_quantities.csv", std::ios::app);
-      out << timestep_number  << ","
-          << time << ","
-          << cD << ","
-          << cL << ","
-          << La << ","
-          << dP << '\n';
+        out << compute_reynolds_number() << ","
+            << compute_drag_coefficient() << ","
+            << compute_lift_coefficient() << ","
+            << compute_recirculation_length() << ","
+            << compute_pressure_difference()
+            << "\n";
+    }
+
+    else if (data.choice == 2)
+    {
+        out << "Re,cDmax,cLmax,St,DeltaP_half_period\n";
+
+        out << compute_reynolds_number() << ","
+            << cD_max << ","
+            << cL_max << ","
+            << compute_strouhal_number() << ","
+            << compute_delta_p_at_half_period()
+            << "\n";
+    }
+
+    else if (data.choice == 3)
+    {
+        out << "cDmax,cLmax,DeltaP_t8\n";
+
+        out << cD_max << ","
+            << cL_max << ","
+            << compute_pressure_difference()
+            << "\n";
+    }
+  }
+
+  if (data.choice == 2 &&
+    Utilities::MPI::this_mpi_process(MPI_COMM_WORLD) == 0)
+  {
+    std::ofstream out("time_series_2D2.csv");
+
+    out << "time,cD,cL\n";
+
+    for (unsigned int i=0; i<time_history.size(); ++i)
+    {
+        out << time_history[i] << ","
+            << cD_history[i] << ","
+            << cL_history[i]
+            << "\n";
+    }
+  } 
+
+  if (data.choice == 3 &&
+    Utilities::MPI::this_mpi_process(MPI_COMM_WORLD) == 0)
+  {
+    std::ofstream out("time_series_2D3.csv");
+
+    out << "time,cD,cL,deltaP\n";
+
+    for (unsigned int i=0; i<time_history.size(); ++i)
+    {
+        out << time_history[i] << ","
+            << cD_history[i] << ","
+            << cL_history[i] << ","
+            << dP_history[i]
+            << "\n";
+    }
+  }
 
   print_benchmark_quantities();
 
@@ -595,10 +656,9 @@ Stokes::compute_drag_lift_forces() const
 
               drag += dF_D;
               lift += dF_L;
-        }
+            }
 
         }
-
 
     }
 
@@ -797,7 +857,7 @@ Stokes::print_benchmark_quantities() const
   
   pcout << "Benchmark quantities at t = " << time << '\n';
   pcout << "  Re = " << compute_reynolds_number() << '\n';
-  
+
   if (data.choice == 2)
   {
     pcout << "  cD_max = " << cD_max << '\n';
