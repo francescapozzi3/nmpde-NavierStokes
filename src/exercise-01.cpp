@@ -135,14 +135,6 @@ main(int argc, char *argv[])
   const double theta = 1.0;
   const double delta_t = 0.01;
 
-
- // TEST 2D - 1 (steady): f = 0,  h = 0, nu = 0.001, u0 = 0 
-    const auto f  = [](const Point<dim>  &/*p*/, const double  &/*t*/) {
-    Tensor<1, dim> F;
-    F = 0.0;
-    return F;
-  };
-
   auto fdata = make_problem_data(choice);
 
   Stokes problem(mesh_file_name, degree_velocity, degree_pressure, T, theta, delta_t, fdata);
