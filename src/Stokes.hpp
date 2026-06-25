@@ -299,6 +299,9 @@ private:
   double compute_pressure_difference() const;
   double compute_recirculation_length() const;
 
+  double compute_strouhal_number() const;
+
+
   double compute_reynolds_number() const;
 
   void print_benchmark_quantities() const;
@@ -318,9 +321,8 @@ protected:
   double cD_max = 0.0;
   double cL_max = 0.0;
 
-  // Problem definition. ///////////////////////////////////////////////////////
-
-
+  std::vector<double> time_history;
+  std::vector<double> dP_history;
 
   // Discretization. ///////////////////////////////////////////////////////////
 

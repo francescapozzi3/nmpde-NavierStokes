@@ -722,6 +722,39 @@ Stokes::compute_reynolds_number() const
   return U * D_cylinder / data.nu;
 }
 
+double
+Stokes::compute_strouhal_number() const
+{
+  if (cL_history.size() < 2)
+    return std::numeric_limits<double>::quiet_NaN();
+
+  // Trova i massimi locali di cL
+  std::vector<double> peak_times;
+
+  for (unsigned int i = 1; i + 1 < cL_history.size(); ++i)
+    {
+      if (cL_history[i] > cL_history[i - 1] &&
+          cL_history[i] > cL_history[i + 1] &&
+          cL_history[i] > 0.5)
+        peak_times.push_back(time_history[i]);
+    }
+
+  if (peak_times.size() < 2)
+    return std::numeric_limits<double>::quiet_NaN();
+
+  // Periodo medio tra picchi consecutivi
+  double period = 0.0;
+  for (unsigned int i = 1; i < peak_times.size(); ++i)
+    period += peak_times[i] - peak_times[i - 1];
+  period /= static_cast<double>(peak_times.size() - 1);
+
+  const double f  = 1.0 / period;
+  const double U  = reference_velocity();
+
+  return D_cylinder * f / U;
+}
+
+
 void
 Stokes::print_benchmark_quantities() const
 {
