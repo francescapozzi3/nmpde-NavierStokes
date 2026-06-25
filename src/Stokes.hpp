@@ -307,6 +307,22 @@ private:
 
   void print_benchmark_quantities() const;
 
+  struct BenchmarkResult
+  {
+    double Re     = 0.0;
+    double cD     = 0.0;
+    double cL     = 0.0;
+    double dP     = 0.0;
+    double La     = std::numeric_limits<double>::quiet_NaN();
+    double cD_max = 0.0;
+    double cL_max = 0.0;
+    double St     = std::numeric_limits<double>::quiet_NaN();
+    double dP_half = std::numeric_limits<double>::quiet_NaN();
+  };
+
+  BenchmarkResult compute_benchmark_result() const;
+  void print_benchmark_quantities(const BenchmarkResult &res) const;
+
 protected:
   // MPI parallel. /////////////////////////////////////////////////////////////
 

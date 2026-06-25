@@ -473,10 +473,17 @@ Stokes::run()
           output();
         }
 
-        if (data.choice == 2 || data.choice == 3)
+    if (data.choice == 2 || data.choice == 3)
       {
-        const double cD = compute_drag_coefficient();
-        const double cL = compute_lift_coefficient();
+        //const double cD = compute_drag_coefficient();
+        //const double cL = compute_lift_coefficient();
+
+        const auto [drag, lift] = compute_drag_lift_forces();
+        const double U   = reference_velocity();
+        const double fac = 2.0 / (data.rho * U * U * D_cylinder);
+
+        const double cD = fac * drag;
+        const double cL = fac * lift;
         const double dP = compute_pressure_difference();
 
         cD_history.push_back(cD);
@@ -503,80 +510,54 @@ Stokes::run()
       //output();
 
     }
- //Write them to file.
-     if (Utilities::MPI::this_mpi_process(MPI_COMM_WORLD) == 0)
+ 
+  // Computation
+  const BenchmarkResult res = compute_benchmark_result();
+
+  // Write csv
+  if (Utilities::MPI::this_mpi_process(MPI_COMM_WORLD) == 0)
   {
-    std::ofstream out("benchmark_quantities.csv");
-
-    if (data.choice == 1)
     {
-        out << "Re,cD,cL,La,DeltaP\n";
-
-        out << compute_reynolds_number() << ","
-            << compute_drag_coefficient() << ","
-            << compute_lift_coefficient() << ","
-            << compute_recirculation_length() << ","
-            << compute_pressure_difference()
-            << "\n";
+      std::ofstream out("benchmark_quantities.csv");
+      if (data.choice == 1)
+      {
+        out << "Re,cD,cL,La,DeltaP\n"
+            << res.Re << "," << res.cD << "," << res.cL << ","
+            << res.La << "," << res.dP << "\n";
+      }
+      else if (data.choice == 2)
+      {
+        out << "Re,cDmax,cLmax,St,DeltaP_half_period\n"
+            << res.Re << "," << res.cD_max << "," << res.cL_max << ","
+            << res.St << "," << res.dP_half << "\n";
+      }
+      else if (data.choice == 3)
+      {
+        out << "cDmax,cLmax,DeltaP_t8\n"
+            << res.cD_max << "," << res.cL_max << "," << res.dP << "\n";
+      }
     }
 
-    else if (data.choice == 2)
+    // Time seriers 
+    if (data.choice == 2)
     {
-        out << "Re,cDmax,cLmax,St,DeltaP_half_period\n";
-
-        out << compute_reynolds_number() << ","
-            << cD_max << ","
-            << cL_max << ","
-            << compute_strouhal_number() << ","
-            << compute_delta_p_at_half_period()
-            << "\n";
+      std::ofstream out("time_series_2D2.csv");
+      out << "time,cD,cL\n";
+      for (unsigned int i = 0; i < time_history.size(); ++i)
+        out << time_history[i] << "," << cD_history[i] << ","
+            << cL_history[i] << "\n";
     }
-
-    else if (data.choice == 3)
+    if (data.choice == 3)
     {
-        out << "cDmax,cLmax,DeltaP_t8\n";
-
-        out << cD_max << ","
-            << cL_max << ","
-            << compute_pressure_difference()
-            << "\n";
+      std::ofstream out("time_series_2D3.csv");
+      out << "time,cD,cL,deltaP\n";
+      for (unsigned int i = 0; i < time_history.size(); ++i)
+        out << time_history[i] << "," << cD_history[i] << ","
+            << cL_history[i] << "," << dP_history[i] << "\n";
     }
   }
 
-  if (data.choice == 2 &&
-    Utilities::MPI::this_mpi_process(MPI_COMM_WORLD) == 0)
-  {
-    std::ofstream out("time_series_2D2.csv");
-
-    out << "time,cD,cL\n";
-
-    for (unsigned int i=0; i<time_history.size(); ++i)
-    {
-        out << time_history[i] << ","
-            << cD_history[i] << ","
-            << cL_history[i]
-            << "\n";
-    }
-  } 
-
-  if (data.choice == 3 &&
-    Utilities::MPI::this_mpi_process(MPI_COMM_WORLD) == 0)
-  {
-    std::ofstream out("time_series_2D3.csv");
-
-    out << "time,cD,cL,deltaP\n";
-
-    for (unsigned int i=0; i<time_history.size(); ++i)
-    {
-        out << time_history[i] << ","
-            << cD_history[i] << ","
-            << cL_history[i] << ","
-            << dP_history[i]
-            << "\n";
-    }
-  }
-
-  print_benchmark_quantities();
+  print_benchmark_quantities(res);
 
 }
 
@@ -849,36 +830,65 @@ Stokes::compute_delta_p_at_half_period() const
 }
 
 
-
-void
-Stokes::print_benchmark_quantities() const
+Stokes::BenchmarkResult
+Stokes::compute_benchmark_result() const
 {
-  pcout << std::fixed << std::setprecision(4);
-  
-  pcout << "Benchmark quantities at t = " << time << '\n';
-  pcout << "  Re = " << compute_reynolds_number() << '\n';
+  BenchmarkResult r;
+  r.Re = compute_reynolds_number();
 
-  if (data.choice == 2)
+  if (data.choice == 1)
   {
-    pcout << "  cD_max = " << cD_max << '\n';
-    pcout << "  cL_max = " << cL_max << '\n';
-    pcout << "  St     = " << compute_strouhal_number() << '\n';
-    pcout << "  ΔP(t0+T/2) = " << compute_delta_p_at_half_period() << '\n'; 
+    auto [drag, lift] = compute_drag_lift_forces();
+    const double U    = reference_velocity();
+    const double fac  = 2.0 / (data.rho * U * U * D_cylinder);
 
+    r.cD = fac * drag;
+    r.cL = fac * lift;
+    r.dP = compute_pressure_difference();
+    r.La = compute_recirculation_length();
   }
-
+  else if (data.choice == 2)
+  {
+    r.cD_max  = cD_max;
+    r.cL_max  = cL_max;
+    r.St      = compute_strouhal_number();
+    r.dP_half = compute_delta_p_at_half_period();
+  }
   else if (data.choice == 3)
   {
-   pcout << "  cD_max = " << cD_max << '\n';
-   pcout << "  cL_max = " << cL_max << '\n';
-   pcout << "  DeltaP(8) = " << compute_pressure_difference() << '\n';
+    r.cD_max = cD_max;
+    r.cL_max = cL_max;
+    r.dP     = compute_pressure_difference(); // at t=8
   }
+  return r;
+}
 
-  else
+
+void
+Stokes::print_benchmark_quantities(const BenchmarkResult &res) const
+{
+  pcout << std::fixed << std::setprecision(4);
+  pcout << "Benchmark quantities at t = " << time << '\n';
+  pcout << "  Re = " << res.Re << '\n';
+
+  if (data.choice == 1)
   {
-    pcout << "  cD = " << compute_drag_coefficient() << '\n';
-    pcout << "  cL = " << compute_lift_coefficient() << '\n';
-    pcout << "  ΔP = " << compute_pressure_difference() << '\n';
-    pcout << "  La = " << compute_recirculation_length() << '\n';
+    pcout << "  cD = " << res.cD << '\n';
+    pcout << "  cL = " << res.cL << '\n';
+    pcout << "  ΔP = " << res.dP << '\n';
+    pcout << "  La = " << res.La << '\n';
+  }
+  else if (data.choice == 2)
+  {
+    pcout << "  cD_max     = " << res.cD_max  << '\n';
+    pcout << "  cL_max     = " << res.cL_max  << '\n';
+    pcout << "  St         = " << res.St      << '\n';
+    pcout << "  ΔP(t0+T/2) = " << res.dP_half << '\n';
+  }
+  else if (data.choice == 3)
+  {
+    pcout << "  cD_max    = " << res.cD_max << '\n';
+    pcout << "  cL_max    = " << res.cL_max << '\n';
+    pcout << "  ΔP(t=8)   = " << res.dP    << '\n';
   }
 }
