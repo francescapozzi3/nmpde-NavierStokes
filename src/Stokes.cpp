@@ -480,8 +480,20 @@ Stokes::run()
         const double cD = compute_drag_coefficient();
         const double cL = compute_lift_coefficient();
 
+        if (time > 3.0)
+         {
         cD_max = std::max(cD_max, std::abs(cD));  // usa abs!
         cL_max = std::max(cL_max, std::abs(cL));
+         }
+      }
+
+       if (data.choice == 3)
+      {
+        // Stampa solo alla fine
+        if (std::abs(time - T) < 0.5 * delta_t)
+          {
+            pcout << "  ΔP(t=8) = " << compute_pressure_difference() << '\n';
+          }
       }
 
 
