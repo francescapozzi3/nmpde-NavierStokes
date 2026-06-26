@@ -69,50 +69,39 @@ public:
   };
 
 
-  // Function for inlet velocity. This actually returns an object with four
-  // components (one for each velocity component, and one for the pressure), but
-  // then only the first three are really used (see the component mask when
-  // applying boundary conditions at the end of assembly). If we only return
-  // three components, however, we may get an error message due to this function
-  // being incompatible with the finite element space.
+  // Function for inlet velocity.
    class InletVelocity : public Function<dim>
-{
-public:
-  InletVelocity(const std::function<Tensor<1, dim>(const Point<dim> &, const double &)> &fun)
-    : Function<dim>(dim + 1)
-    , fun(fun)
-  {}
-
-  void set_time(const double t) override
-   { 
-    time = t; 
-  }
-
-  void vector_value(const Point<dim> &p, Vector<double> &values) const override
   {
-    const Tensor<1, dim> u = fun(p, time);
+  public:
+    InletVelocity(const std::function<Tensor<1, dim>(const Point<dim> &, const double &)> &fun)
+      : Function<dim>(dim + 1)
+      , fun(fun)
+    {}
 
-    values = 0.0;
-    for (unsigned int d = 0; d < dim; ++d)
-      values[d] = u[d];
-  }
+    void set_time(const double t) override
+    { 
+      time = t; 
+    }
 
-private:
-  std::function<Tensor<1, dim>(const Point<dim> &, const double &)> fun;
-  double time = 0.0;
-};
+    void vector_value(const Point<dim> &p, Vector<double> &values) const override
+    {
+      const Tensor<1, dim> u = fun(p, time);
 
+      values = 0.0;
+      for (unsigned int d = 0; d < dim; ++d)
+        values[d] = u[d];
+    }
 
-  // Since we're working with block matrices, we need to make our own
-  // preconditioner class. A preconditioner class can be any class that exposes
-  // a vmult method that applies the inverse of the preconditioner.
+  private:
+    std::function<Tensor<1, dim>(const Point<dim> &, const double &)> fun;
+    double time = 0.0;
+  };
 
   // Identity preconditioner.
   class PreconditionIdentity
   {
   public:
-    // Application of the preconditioner: we just copy the input vector (src)
-    // into the output vector (dst).
+    // Application of the preconditioner
     void
     vmult(TrilinosWrappers::MPI::BlockVector       &dst,
           const TrilinosWrappers::MPI::BlockVector &src) const
@@ -127,8 +116,7 @@ private:
   class PreconditionBlockDiagonal
   {
   public:
-    // Initialize the preconditioner, given the velocity stiffness matrix, the
-    // pressure mass matrix.
+    // Initialize the preconditioner.
     void
     initialize(const TrilinosWrappers::SparseMatrix &velocity_stiffness_,
                const TrilinosWrappers::SparseMatrix &pressure_mass_)
@@ -181,8 +169,7 @@ private:
   class PreconditionBlockTriangular
   {
   public:
-    // Initialize the preconditioner, given the velocity stiffness matrix, the
-    // pressure mass matrix.
+    // Initialize the preconditioner.
     void
     initialize(const TrilinosWrappers::SparseMatrix &velocity_stiffness_,
                const TrilinosWrappers::SparseMatrix &pressure_mass_,
@@ -216,16 +203,16 @@ private:
       tmp.sadd(-1.0, src.block(1));
 
       SolverControl solver_control_pressure(2000, 1e-3 * src.block(1).l2_norm());
-      SolverCG<TrilinosWrappers::MPI::Vector> solver_cg_pressure(
-        solver_control_pressure);
+      SolverCG<TrilinosWrappers::MPI::Vector> solver_cg_pressure(solver_control_pressure);
       solver_cg_pressure.solve(*pressure_mass,
                                dst.block(1),
                                tmp,
                                preconditioner_pressure);
-
     }
 
+
   protected:
+
     // Velocity stiffness matrix.
     const TrilinosWrappers::SparseMatrix *velocity_stiffness;
 
@@ -247,13 +234,13 @@ private:
 
 
  // Constructor.
-  Stokes(const std::string  &mesh_file_name_,
-         const unsigned int &degree_velocity_,
-         const unsigned int &degree_pressure_,
+  Stokes(const std::string                               &mesh_file_name_,
+         const unsigned int                              &degree_velocity_,
+         const unsigned int                              &degree_pressure_,
          const double                                    &T_,
          const double                                    &theta_,
          const double                                    &delta_t_,
-         const ProblemData &problem_data_)
+         const ProblemData                               &problem_data_)
     : mpi_size(Utilities::MPI::n_mpi_processes(MPI_COMM_WORLD))
     , mpi_rank(Utilities::MPI::this_mpi_process(MPI_COMM_WORLD))
     , pcout(std::cout, mpi_rank == 0)
@@ -266,17 +253,16 @@ private:
     , data(problem_data_)
     , mesh(MPI_COMM_WORLD)
   {}
-// Run the time-dependent simulation.
+
+ // Run the time-dependent simulation.
   void
   run();
-
 
   // Setup system.
   void
   setup();
 
-  // Assemble system. We also assemble the pressure mass matrix (needed for the
-  // preconditioner).
+  // Assemble system.
   void
   assemble();
 
@@ -289,23 +275,12 @@ private:
   output();
 
   // Benchmark quantities.
+  double compute_reynolds_number() const;
   std::pair<double, double> compute_drag_lift_forces() const;
-  double compute_drag_force() const;
-  double compute_lift_force() const;
-
-  double compute_drag_coefficient() const;
-  double compute_lift_coefficient() const;
-
   double compute_pressure_difference() const;
   double compute_recirculation_length() const;
-
   double compute_strouhal_number() const;
-
   double compute_delta_p_at_half_period() const;
-
-  double compute_reynolds_number() const;
-
-  void print_benchmark_quantities() const;
 
   struct BenchmarkResult
   {
@@ -338,9 +313,10 @@ protected:
   double cD_max = 0.0;
   double cL_max = 0.0;
 
+  // Time series of drag and lift coefficients and pressure difference.
+  std::vector<double> time_history;
   std::vector<double> cL_history;
   std::vector<double> cD_history;
-  std::vector<double> time_history;
   std::vector<double> dP_history;
 
   // Discretization. ///////////////////////////////////////////////////////////
@@ -414,7 +390,6 @@ protected:
   TrilinosWrappers::MPI::BlockVector solution;
 
  // Physical constants for the benchmark.
-  static constexpr double rho = 1.0;
   static constexpr double D_cylinder = 0.1;
 
   // 2D benchmark points.
@@ -423,7 +398,6 @@ protected:
   static constexpr double x_back_cylinder   = 0.25;
 
   // Search interval for the recirculation zone.
-  // Change x_wake_end if your mesh outlet x-coordinate is different.
   static constexpr double x_wake_start = x_back_cylinder;
   static constexpr double x_wake_end   = 2.20;
 
@@ -432,8 +406,6 @@ protected:
     // From the benchmark: U = 2 U(0,H/2,t) / 3.
     return 2.0 * data.Um / 3.0;
   }
-
-
 
 };
 

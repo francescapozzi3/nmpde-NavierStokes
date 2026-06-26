@@ -74,7 +74,7 @@ namespace
 
       case Case2D::case3:
       {
-        // 2D-3: unsteady con inlet oscillante
+        // 2D-3: unsteady
         data.choice = choice;
         data.nu = 0.001;
         data.rho = 1.0;
@@ -116,11 +116,11 @@ main(int argc, char *argv[])
 
   if (Utilities::MPI::this_mpi_process(MPI_COMM_WORLD) == 0)
     {
-      std::cout << "Scegli il caso da eseguire:\n";
-      std::cout << "  1 = caso 2D-1\n";
-      std::cout << "  2 = caso 2D-2\n";
-      std::cout << "  3 = caso 2D-3\n";
-      std::cout << "Inserisci 1, 2 o 3: ";
+      std::cout << "Which case you want to test:\n";
+      std::cout << "  1 = case 2D-1\n";
+      std::cout << "  2 = case 2D-2\n";
+      std::cout << "  3 = case 2D-3\n";
+      std::cout << "Insert 1, 2 or 3: ";
       std::cin >> choice;
     }
 
@@ -131,9 +131,9 @@ main(int argc, char *argv[])
   const unsigned int degree_velocity = 2;
   const unsigned int degree_pressure = 1;
   
-  const double T = 10.0;
+  const double T = 8.0;
   const double theta = 1.0;
-  const double delta_t = 0.01;
+  const double delta_t = 0.001;
 
   auto fdata = make_problem_data(choice);
 

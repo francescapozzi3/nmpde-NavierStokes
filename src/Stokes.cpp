@@ -209,20 +209,16 @@ Stokes::assemble()
       fe_values[velocity].get_function_values(solution, solution_old_values);
       fe_values[velocity].get_function_gradients(solution, solution_old_grads);
 
-
       for (unsigned int q = 0; q < n_q; ++q)
         {
 
-          
            const Tensor<1, dim> f_old_loc = data.f(fe_values.quadrature_point(q), time - delta_t);
            const Tensor<1, dim> f_new_loc = data.f(fe_values.quadrature_point(q), time);
-
 
           for (unsigned int i = 0; i < dofs_per_cell; ++i)
             {
               for (unsigned int j = 0; j < dofs_per_cell; ++j)
                 {
-
                   // Time derivative: (1/dt) (u^{n+1}, v)
                   cell_matrix(i, j) += (1.0 / delta_t) *             //
                                        fe_values[velocity].value(i, q) * //
@@ -230,26 +226,19 @@ Stokes::assemble()
                                        fe_values.JxW(q);
 
                   // Viscosity term: nu * theta * (grad u^{n+1}, grad v)
-                  cell_matrix(i, j) +=
-                    data.nu * theta *
-                    scalar_product(fe_values[velocity].gradient(i, q),
-                                   fe_values[velocity].gradient(j, q)) *
-                    fe_values.JxW(q);
+                  cell_matrix(i, j) += data.nu * theta *
+                                        scalar_product(fe_values[velocity].gradient(i, q),
+                                                      fe_values[velocity].gradient(j, q)) *
+                                        fe_values.JxW(q);
 
 
                   // Convection term: ((u^n · grad) u^{n+1}, v)
-                 /* cell_matrix(i, j) += (solution_old_values[q] * // u_n
-                          fe_values[velocity].gradient(j, q) * // grad u_{n+1}
-                          fe_values[velocity].value(i, q) // v
-                         ) * fe_values.JxW(q);
-                         // Convection term: ((u^n \cdot grad) u^{n+1}, v)
-                  */
                   cell_matrix(i, j) += theta *
-                  (fe_values[velocity].gradient(j, q) * solution_old_values[q]) 
-                  * fe_values[velocity].value(i, q) 
-                  * fe_values.JxW(q);
+                                      (fe_values[velocity].gradient(j, q) * solution_old_values[q]) 
+                                      * fe_values[velocity].value(i, q) 
+                                      * fe_values.JxW(q);
 
-                 // Pressure term in the momentum equation: -(p^{n+1}, div v)
+                  // Pressure term in the momentum equation: -(p^{n+1}, div v)
                   cell_matrix(i, j) -= fe_values[velocity].divergence(i, q) *
                                        fe_values[pressure].value(j, q) *
                                        fe_values.JxW(q);
@@ -259,12 +248,11 @@ Stokes::assemble()
                                        fe_values[pressure].value(i, q) *
                                        fe_values.JxW(q);
 
-
                   // Pressure mass matrix
                    cell_pressure_mass_matrix(i, j) += (data.nu + (1.0 / delta_t)) *
-                    fe_values[pressure].value(i, q) *
-                    fe_values[pressure].value(j, q) *
-                    fe_values.JxW(q);
+                                                      fe_values[pressure].value(i, q) *
+                                                      fe_values[pressure].value(j, q) *
+                                                      fe_values.JxW(q);
                 
                   }
 
@@ -280,20 +268,18 @@ Stokes::assemble()
                                             solution_old_grads[q]) *    //
                              fe_values.JxW(q);
                   
-              // Forcing term: (f^{n+theta}, v)
-              cell_rhs(i) +=  (theta * f_new_loc + (1.0 - theta) * f_old_loc) *                      //
-                             fe_values[velocity].value(i, q) * //
-                             fe_values.JxW(q);
+                  // Forcing term: (f^{n+theta}, v)
+                  cell_rhs(i) +=  (theta * f_new_loc + (1.0 - theta) * f_old_loc) *                      //
+                                fe_values[velocity].value(i, q) * //
+                                fe_values.JxW(q);
               
-               // RHS convection explicit part
-              const Tensor<1, dim> conv_old =
-                solution_old_grads[q] * solution_old_values[q];
+                  // RHS convection explicit part
+                  const Tensor<1, dim> conv_old = solution_old_grads[q] * solution_old_values[q];
 
-              cell_rhs(i) -= (1.0 - theta) *
-                            (conv_old * fe_values[velocity].value(i, q)) *
-                            fe_values.JxW(q);
+                  cell_rhs(i) -= (1.0 - theta) *
+                                (conv_old * fe_values[velocity].value(i, q)) *
+                                fe_values.JxW(q);
                       
-
             }
         }
 
@@ -310,15 +296,11 @@ Stokes::assemble()
 
                   for (unsigned int q = 0; q < n_q_face; ++q)
                     {
-                    //const Tensor<1, dim> h_val = h(fe_face_values.quadrature_point(q), time);
-                   const Tensor<1, dim> h_val = data.h(fe_face_values.quadrature_point(q), time);
+                      const Tensor<1, dim> h_val = data.h(fe_face_values.quadrature_point(q), time);
 
                     for (unsigned int i = 0; i < dofs_per_cell; ++i)
                         {
-                          // mettere h_val al posto di h e quest0
-                          //cell_rhs(i) += (h_val * fe_face_values[velocity].value(i, q)) * fe_face_values.JxW(q);
-
-                           cell_rhs(i) += scalar_product(h_val,
+                             cell_rhs(i) += scalar_product(h_val,
                               fe_face_values[velocity].value(i, q)) *
                               fe_face_values.JxW(q);
                         }
@@ -352,8 +334,8 @@ Stokes::assemble()
     boundary_functions[3] = &zero_function; // top/bottom walls
     boundary_functions[4] = &zero_function; // cylinder
 
-   ComponentMask mask_velocity(dim + 1, true);
-   mask_velocity.set(dim, false);
+    ComponentMask mask_velocity(dim + 1, true);
+    mask_velocity.set(dim, false);
 
     VectorTools::interpolate_boundary_values(dof_handler,
                                              boundary_functions,
@@ -371,17 +353,8 @@ Stokes::solve()
 {
   pcout << "===============================================" << std::endl;
 
-  //SolverControl solver_control(10000, 1e-4 * system_rhs.l2_norm());
-  //SolverGMRES<TrilinosWrappers::MPI::BlockVector> solver(solver_control);
-
-  
   SolverControl solver_control(20000, 1e-4 * system_rhs.l2_norm());
   SolverFGMRES<TrilinosWrappers::MPI::BlockVector> solver(solver_control);
-
- /* PreconditionBlockDiagonal preconditioner;
-  preconditioner.initialize(system_matrix.block(0, 0),
-                             pressure_mass.block(1, 1));
- */
  
  PreconditionBlockTriangular preconditioner;
   preconditioner.initialize(system_matrix.block(0, 0),
@@ -468,16 +441,13 @@ Stokes::run()
       // solution vector.
       solution = solution_owned;
 
-    if (timestep_number % 10 == 0)
+       if (timestep_number % 10 == 0)
         { 
           output();
         }
 
-    if (data.choice == 2 || data.choice == 3)
+        if (data.choice == 2 || data.choice == 3)
       {
-        //const double cD = compute_drag_coefficient();
-        //const double cL = compute_lift_coefficient();
-
         const auto [drag, lift] = compute_drag_lift_forces();
         const double U   = reference_velocity();
         const double fac = 2.0 / (data.rho * U * U * D_cylinder);
@@ -493,7 +463,7 @@ Stokes::run()
 
         if (data.choice == 2)
         {
-            if (time > 15.0)
+            if (time > 3.0)
             {
                 cD_max = std::max(cD_max,std::abs(cD));
                 cL_max = std::max(cL_max,std::abs(cL));
@@ -650,31 +620,6 @@ Stokes::compute_drag_lift_forces() const
   return {drag_global, lift_global};
 }
 
-double
-Stokes::compute_drag_force() const
-{
-  return compute_drag_lift_forces().first;
-}
-
-double
-Stokes::compute_lift_force() const
-{
-  return compute_drag_lift_forces().second;
-}
-
-double
-Stokes::compute_drag_coefficient() const
-{
-  const double U = reference_velocity();
-  return 2.0 * compute_drag_force() / (rho * U * U * D_cylinder);
-}
-
-double
-Stokes::compute_lift_coefficient() const
-{
-  const double U = reference_velocity();
-  return 2.0 * compute_lift_force() / (rho * U * U * D_cylinder);
-}
 
 double
 Stokes::compute_pressure_difference() const
@@ -775,8 +720,7 @@ Stokes::compute_strouhal_number() const
   for (unsigned int i = 1; i + 1 < cL_history.size(); ++i)
     {
       if (cL_history[i] > cL_history[i - 1] &&
-          cL_history[i] > cL_history[i + 1] &&
-          cL_history[i] > 0.5)
+          cL_history[i] > cL_history[i + 1])
         peak_times.push_back(time_history[i]);
     }
 
