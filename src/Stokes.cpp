@@ -535,39 +535,51 @@ Stokes::run()
 std::pair<double, double>
 Stokes::compute_drag_lift_forces() const
 {
-  FEFaceValues<dim> fe_face_values(*fe,
+
+  // FEFaceValues object for integration over boundary faces
+  // (updates values, gradients, outward normals, and quadrature weights JxW)
+   FEFaceValues<dim> fe_face_values(*fe,
                                    *quadrature_face,
                                    update_values | update_gradients |
                                      update_normal_vectors |
                                      update_JxW_values);
-
+  // Extractors to access velocity (dim components) and pressure from the FE solution
   FEValuesExtractors::Vector velocity(0);
   FEValuesExtractors::Scalar pressure(dim);
 
   const unsigned int n_q_face = quadrature_face->size();
 
-  std::vector<Tensor<1, dim>> velocity_values(n_q_face);
-  std::vector<Tensor<2, dim>> velocity_grads(n_q_face);
-  std::vector<double> pressure_values(n_q_face);
+  // Buffers for solution values at face quadrature points
+  std::vector<Tensor<1, dim>> velocity_values(n_q_face); // u at quadrature point q
+  std::vector<Tensor<2, dim>> velocity_grads(n_q_face); // ∇u at quadrature point q
+  std::vector<double> pressure_values(n_q_face); // p at quadrature point q
 
+  // local accumulator for the drag and lift force
   double drag = 0.0;
   double lift = 0.0;
 
   for (const auto &cell : dof_handler.active_cell_iterators())
     {
-      if (!cell->is_locally_owned())
-        continue;
 
+      // skip cells not owned by this MPI process
+      if (!cell->is_locally_owned()) 
+        continue;  
+
+      // skip cells that do not touch the boundary
       if (!cell->at_boundary())
-        continue;
+        continue; 
 
       for (unsigned int f = 0; f < cell->n_faces(); ++f)
         {
+
+          // Only consider faces on the boundary with ID=4 (cylinder surface)
           if (!(cell->face(f)->at_boundary() && cell->face(f)->boundary_id() == 4))
             continue;
 
+          // initialize FEFaceValues on the current face
           fe_face_values.reinit(cell, f);
 
+          // Extract velocity values, gradients, and pressure from the solution vector
           fe_face_values[velocity].get_function_values(solution, velocity_values);
           fe_face_values[velocity].get_function_gradients(solution, velocity_grads);
           fe_face_values[pressure].get_function_values(solution, pressure_values);
@@ -575,36 +587,40 @@ Stokes::compute_drag_lift_forces() const
                
          for (unsigned int q = 0; q < n_q_face; ++q)
             {
-              // n_out = normale uscente dal dominio.
-              // Sul cilindro è diretta verso l'interno del solido, quindi la invertiamo
-              // per ottenere la normale uscente dal cilindro.
+
+              // The outward normal from the fluid domain points into the cylinder,
+              // so we flip it to get the normal pointing outward from the cylinder into the fluid
               const Tensor<1, dim> n = -fe_face_values.normal_vector(q);
 
-              // t = (ny, -nx)
+              // // Tangent vector obtained by rotating n by 90°: t = (ny, -nx)
               Tensor<1, dim> t;
               t[0] =  n[1];
               t[1] = -n[0];
 
-              // ∂v_t/∂n = n · ∇(u · t)
-              // = Σ_i Σ_j n_i (∂u_j/∂x_i) t_j
+              // Derivative of the tangential velocity in the normal direction:
+              // ∂v_t/∂n = n · ∇(u · t) = Σ_i Σ_j n_i (∂u_j/∂x_i) t_j
               double dvt_dn = 0.0;
               for (unsigned int i = 0; i < dim; ++i)
                 for (unsigned int j = 0; j < dim; ++j)
                   dvt_dn += n[i] * velocity_grads[q][j][i] * t[j];
 
-              // p = pressione nel punto di quadratura.
+              // p = pressure at the current quadrature point
               const double p = pressure_values[q];
 
+              // Elementary drag contribution (force in the x-direction):
               // FD = ∫ (ρν ∂v_t/∂n * ny - p * nx) dS
               const double dF_D =
                 (data.rho * data.nu * dvt_dn * n[1] - p * n[0]) *
                 fe_face_values.JxW(q);
 
+              // Elementary lift contribution (force in the y-direction):
               // FL = -∫ (ρν ∂v_t/∂n * nx + p * ny) dS
+              // Minus sign from the sign convention for the lift projection onto e_y
               const double dF_L =
                 -(data.rho * data.nu * dvt_dn * n[0] + p * n[1]) *
                 fe_face_values.JxW(q);
 
+              /// accumulate local drag and lift contribution
               drag += dF_D;
               lift += dF_L;
             }
@@ -624,36 +640,48 @@ Stokes::compute_drag_lift_forces() const
 double
 Stokes::compute_pressure_difference() const
 {
+  // Build a linear (P1) mapping required by VectorTools::point_value on simplex meshes
+  // Must use MappingFE with a scalar FE
   const FE_SimplexP<dim> fe_map(1);
   const MappingFE<dim>   mapping(fe_map);
 
+  // Extractor for the pressure component
   const FEValuesExtractors::Scalar pressure(dim);
 
+  // Lambda: returns the pressure value at a given geometric point p
   auto get_pressure_at_point = [&](const Point<dim> &p) -> double
   {
     double local_value = 0.0;
 
     try
       {
+        // buffer for all components (u_x, u_y, p)
         Vector<double> values(fe->n_components());
+        // Evaluates the solution at point p; throws if the point is not on this MPI process
         VectorTools::point_value(mapping, dof_handler, solution, p, values);
-        local_value = values(dim); // componente pressione
+        // extract only the pressure component (index dim)
+        local_value = values(dim);
       }
     catch (const VectorTools::ExcPointNotAvailableHere &)
       {
-          // This process does not own the point.
+          // The point belongs to another MPI process: local_value stays 0
       }
 
+      // MPI reduction: sum across processes (only one will have local_value ≠ 0)
          return Utilities::MPI::sum(local_value, MPI_COMM_WORLD);
 
   };
 
+  // Sampling point at the front of the cylinder (upstream side, at centerline height)
   const Point<dim> p_front(x_front_cylinder, y_probe);
+  // Sampling point at the rear of the cylinder (downstream side, at centerline height)
   const Point<dim> p_back(x_back_cylinder,   y_probe);
 
+  // pressure upstream and downstream of the cylinder
   const double p1 = get_pressure_at_point(p_front);
   const double p2 = get_pressure_at_point(p_back);
 
+  // ΔP = p_front − p_back (positive when there is a pressure drop)
   return p1 - p2;
 }
 
@@ -663,8 +691,10 @@ Stokes::compute_pressure_difference() const
    const FE_SimplexP<dim> fe_map(1);  
   const MappingFE<dim>   mapping(fe_map);
   const unsigned int n_samples = 400; 
+  // fixed y-coordinate (cylinder centerline)
   const double y = y_probe; 
 
+  // Lambda: returns the x-component of velocity at point (x, y)
   auto u_x_at = [&](const double x) -> double { 
     double local_value = 0.0;
     try
@@ -672,31 +702,41 @@ Stokes::compute_pressure_difference() const
         Vector<double> values(fe->n_components()); 
         const Point<dim> p(x, y); 
         VectorTools::point_value(mapping, dof_handler, solution, p, values); 
-        local_value = values[0];
+        local_value = values[0]; // x-component u_x
       }
     catch (const VectorTools::ExcPointNotAvailableHere &)
       {
-        // Il punto non è su questo processo, ok
+        /// Point not on this MPI process
       }
     return Utilities::MPI::sum(local_value, MPI_COMM_WORLD);
   }; 
 
+  // First sampling point: just past the rear edge of the cylinder (small offset to avoid boundary)
   double x_prev = x_wake_start + 1e-6; 
   double u_prev = u_x_at(x_prev); 
   for (unsigned int k = 1; k <= n_samples; ++k) { 
+
+   // Sample uniformly from x_back_cylinder+0.005 to x_wake_end
    const double x =
         (x_back_cylinder + 0.005) +
         (x_wake_end - (x_back_cylinder + 0.005)) * static_cast<double>(k) / n_samples;
     const double u = u_x_at(x);
 
+    // Detect sign change of u_x: u_prev < 0 and u >= 0
+    // -> the recirculation zone (u_x < 0) ends here
     if (u_prev < 0.0 && u >= 0.0) 
     { 
+      // Linear interpolation to find the exact point xr where u_x = 0
       const double xr = x_prev - u_prev * (x - x_prev) / (u - u_prev); 
-      return xr - x_back_cylinder; // La = xr - 0.25
+      return xr - x_back_cylinder; // La = xr − x_back: recirculation bubble length
     } 
+
+    // advance to the next sampling point
     x_prev = x; 
     u_prev = u; 
   } 
+  
+  // No sign change found: La is undefined (steady flow with no recirculation bubble)
   return std::numeric_limits<double>::quiet_NaN();
 }
 
@@ -705,37 +745,43 @@ Stokes::compute_reynolds_number() const
 {
   const double U = reference_velocity();
 
+  // Re = U · D / ν   (Reynolds number based on cylinder diameter)
   return U * D_cylinder / data.nu;
 }
 
 double
 Stokes::compute_strouhal_number() const
 {
+  // need at least a time history to work with
   if (cL_history.size() < 2)
     return std::numeric_limits<double>::quiet_NaN();
 
-  // Trova i massimi locali di cL
+  // will hold the times of local maxima of cL
   std::vector<double> peak_times;
 
+  // Local maximum: cL[i] > cL[i-1]  and  cL[i] > cL[i+1]
   for (unsigned int i = 1; i + 1 < cL_history.size(); ++i)
     {
       if (cL_history[i] > cL_history[i - 1] &&
           cL_history[i] > cL_history[i + 1])
-        peak_times.push_back(time_history[i]);
+        peak_times.push_back(time_history[i]); // store the time of this peak
     }
 
+  // need at least 2 peaks to estimate the period
   if (peak_times.size() < 2)
     return std::numeric_limits<double>::quiet_NaN();
 
-  // Periodo medio tra picchi consecutivi
+  // Estimate the mean period T as the average gap between consecutive peaks
   double period = 0.0;
   for (unsigned int i = 1; i < peak_times.size(); ++i)
     period += peak_times[i] - peak_times[i - 1];
   period /= static_cast<double>(peak_times.size() - 1);
 
+   // vortex shedding frequency: f = 1/T
   const double f  = 1.0 / period;
   const double U  = reference_velocity();
 
+    // St = f · D / U   (Strouhal number)
   return D_cylinder * f / U;
 }
 
@@ -745,20 +791,22 @@ Stokes::compute_delta_p_at_half_period() const
   if (dP_history.empty() || cL_history.empty())
     return std::numeric_limits<double>::quiet_NaN();
 
-  // Trova t0 = tempo del massimo di cL
+  // Find t0 = time at which cL reaches its global maximum in the recorded history
   const auto it_max = std::max_element(cL_history.begin(), cL_history.end());
   const double t0   = time_history[std::distance(cL_history.begin(), it_max)];
 
-  // Calcola il mezzo periodo da St
+  // Compute the Strouhal number in order to derive the half-period
   const double St = compute_strouhal_number();
   if (std::isnan(St))
     return std::numeric_limits<double>::quiet_NaN();
 
   const double U           = reference_velocity();
+  // T/2 = D / (2 · St · U)   (half-period of the vortex shedding cycle)
   const double half_period = D_cylinder / (2.0 * St * U);
+  // target instant = t0 + T/2
   const double target      = t0 + half_period;
 
-  // Trova il punto nella storia più vicino a target
+  // Find the sample in the time history closest to the target instant
   double best_dp   = std::numeric_limits<double>::quiet_NaN();
   double best_dist = std::numeric_limits<double>::max();
   for (unsigned int i = 0; i < time_history.size(); ++i)
@@ -766,11 +814,11 @@ Stokes::compute_delta_p_at_half_period() const
       const double d = std::abs(time_history[i] - target);
       if (d < best_dist)
         {
-          best_dist = d;
-          best_dp   = dP_history[i];
+          best_dist = d;  // update minimum distance
+          best_dp   = dP_history[i]; // store the corresponding ΔP value
         }
     }
-  return best_dp;
+  return best_dp; // ΔP at the instant t0 + T/2
 }
 
 
