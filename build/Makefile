@@ -48,19 +48,19 @@ cmake_force:
 SHELL = /bin/sh
 
 # The CMake executable.
-CMAKE_COMMAND = /u/sw/toolchains/gcc-glibc/11.2.0/base/bin/cmake
+CMAKE_COMMAND = /usr/bin/cmake
 
 # The command to remove a file.
-RM = /u/sw/toolchains/gcc-glibc/11.2.0/base/bin/cmake -E rm -f
+RM = /usr/bin/cmake -E rm -f
 
 # Escaping for special characters.
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/martinaarusconi/nmpde-NavierStokes
+CMAKE_SOURCE_DIR = /home/ubuntu/shared-folder/NMPDE/nmpde-NavierStokes
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/martinaarusconi/nmpde-NavierStokes/build
+CMAKE_BINARY_DIR = /home/ubuntu/shared-folder/NMPDE/nmpde-NavierStokes/build
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -68,7 +68,7 @@ CMAKE_BINARY_DIR = /home/martinaarusconi/nmpde-NavierStokes/build
 # Special rule for the target edit_cache
 edit_cache:
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "No interactive CMake dialog available..."
-	/u/sw/toolchains/gcc-glibc/11.2.0/base/bin/cmake -E echo No\ interactive\ CMake\ dialog\ available.
+	/usr/bin/cmake -E echo No\ interactive\ CMake\ dialog\ available.
 .PHONY : edit_cache
 
 # Special rule for the target edit_cache
@@ -78,7 +78,7 @@ edit_cache/fast: edit_cache
 # Special rule for the target rebuild_cache
 rebuild_cache:
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Running CMake to regenerate build system..."
-	/u/sw/toolchains/gcc-glibc/11.2.0/base/bin/cmake --regenerate-during-build -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
+	/usr/bin/cmake --regenerate-during-build -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
 .PHONY : rebuild_cache
 
 # Special rule for the target rebuild_cache
@@ -87,9 +87,9 @@ rebuild_cache/fast: rebuild_cache
 
 # The main all target
 all: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/martinaarusconi/nmpde-NavierStokes/build/CMakeFiles /home/martinaarusconi/nmpde-NavierStokes/build//CMakeFiles/progress.marks
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/ubuntu/shared-folder/NMPDE/nmpde-NavierStokes/build/CMakeFiles /home/ubuntu/shared-folder/NMPDE/nmpde-NavierStokes/build//CMakeFiles/progress.marks
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/martinaarusconi/nmpde-NavierStokes/build/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/ubuntu/shared-folder/NMPDE/nmpde-NavierStokes/build/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
@@ -129,29 +129,29 @@ exercise-01/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/exercise-01.dir/build.make CMakeFiles/exercise-01.dir/build
 .PHONY : exercise-01/fast
 
-src/Stokes.o: src/Stokes.cpp.o
-.PHONY : src/Stokes.o
+src/NavierStokes2D.o: src/NavierStokes2D.cpp.o
+.PHONY : src/NavierStokes2D.o
 
 # target to build an object file
-src/Stokes.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/exercise-01.dir/build.make CMakeFiles/exercise-01.dir/src/Stokes.cpp.o
-.PHONY : src/Stokes.cpp.o
+src/NavierStokes2D.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/exercise-01.dir/build.make CMakeFiles/exercise-01.dir/src/NavierStokes2D.cpp.o
+.PHONY : src/NavierStokes2D.cpp.o
 
-src/Stokes.i: src/Stokes.cpp.i
-.PHONY : src/Stokes.i
+src/NavierStokes2D.i: src/NavierStokes2D.cpp.i
+.PHONY : src/NavierStokes2D.i
 
 # target to preprocess a source file
-src/Stokes.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/exercise-01.dir/build.make CMakeFiles/exercise-01.dir/src/Stokes.cpp.i
-.PHONY : src/Stokes.cpp.i
+src/NavierStokes2D.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/exercise-01.dir/build.make CMakeFiles/exercise-01.dir/src/NavierStokes2D.cpp.i
+.PHONY : src/NavierStokes2D.cpp.i
 
-src/Stokes.s: src/Stokes.cpp.s
-.PHONY : src/Stokes.s
+src/NavierStokes2D.s: src/NavierStokes2D.cpp.s
+.PHONY : src/NavierStokes2D.s
 
 # target to generate assembly for a file
-src/Stokes.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/exercise-01.dir/build.make CMakeFiles/exercise-01.dir/src/Stokes.cpp.s
-.PHONY : src/Stokes.cpp.s
+src/NavierStokes2D.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/exercise-01.dir/build.make CMakeFiles/exercise-01.dir/src/NavierStokes2D.cpp.s
+.PHONY : src/NavierStokes2D.cpp.s
 
 src/exercise-01.o: src/exercise-01.cpp.o
 .PHONY : src/exercise-01.o
@@ -186,9 +186,9 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... exercise-01"
-	@echo "... src/Stokes.o"
-	@echo "... src/Stokes.i"
-	@echo "... src/Stokes.s"
+	@echo "... src/NavierStokes2D.o"
+	@echo "... src/NavierStokes2D.i"
+	@echo "... src/NavierStokes2D.s"
 	@echo "... src/exercise-01.o"
 	@echo "... src/exercise-01.i"
 	@echo "... src/exercise-01.s"

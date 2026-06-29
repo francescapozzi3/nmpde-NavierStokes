@@ -1,4 +1,4 @@
-#include "Stokes.hpp"
+#include "NavierStokes2D.hpp"
 
 namespace
 {
@@ -6,18 +6,18 @@ namespace
 
   enum class Case2D { case1 = 1, case2 = 2, case3 = 3 };
 
-  Stokes::ProblemData make_problem_data(const unsigned int choice)
+  NavierStokes2D::ProblemData make_problem_data(const unsigned int choice)
   {
-    Stokes::ProblemData data;
+    NavierStokes2D::ProblemData data;
 
-    auto zero_vec = [](const Point<Stokes::dim> &, const double &) {
-      Tensor<1, Stokes::dim> F;
+    auto zero_vec = [](const Point<NavierStokes2D::dim> &, const double &) {
+      Tensor<1, NavierStokes2D::dim> F;
       F = 0.0;
       return F;
     };
 
-    auto zero_u0 = [](const Point<Stokes::dim> &) {
-      Tensor<1, Stokes::dim> U;
+    auto zero_u0 = [](const Point<NavierStokes2D::dim> &) {
+      Tensor<1, NavierStokes2D::dim> U;
       U = 0.0;
       return U;
     };
@@ -37,8 +37,8 @@ namespace
         data.u0 = zero_u0;
         
 
-        data.u_in = [data](const Point<Stokes::dim> &p, const double &) {
-          Tensor<1, Stokes::dim> U;
+        data.u_in = [data](const Point<NavierStokes2D::dim> &p, const double &) {
+          Tensor<1, NavierStokes2D::dim> U;
           const double y = p[1];
           const double profile = 4.0 * y * (H - y) / (H * H);
           U[0] = data.Um * profile;
@@ -61,8 +61,8 @@ namespace
         data.u0 = zero_u0;
         
 
-        data.u_in = [data](const Point<Stokes::dim> &p, const double &) {
-          Tensor<1, Stokes::dim> U;
+        data.u_in = [data](const Point<NavierStokes2D::dim> &p, const double &) {
+          Tensor<1, NavierStokes2D::dim> U;
           const double y = p[1];
           const double profile = 4.0 * y * (H - y) / (H * H);
           U[0] = data.Um * profile;
@@ -85,8 +85,8 @@ namespace
         data.u0 = zero_u0;
         
 
-        data.u_in = [data](const Point<Stokes::dim> &p, const double &t) {
-          Tensor<1, Stokes::dim> U;
+        data.u_in = [data](const Point<NavierStokes2D::dim> &p, const double &t) {
+          Tensor<1, NavierStokes2D::dim> U;
           const double y = p[1];
           const double profile = 4.0 * y * (H - y) / (H * H);
           const double amp = std::sin(M_PI * t / 8.0);
@@ -98,7 +98,7 @@ namespace
       }
 
       default:
-        throw std::runtime_error("Not valide choice: use 1, 2 or 3.");
+        throw std::runtime_error("Not valid choice: use 1, 2 or 3.");
     }
 
     return data;
@@ -137,7 +137,7 @@ main(int argc, char *argv[])
 
   auto fdata = make_problem_data(choice);
 
-  Stokes problem(mesh_file_name, degree_velocity, degree_pressure, T, theta, delta_t, fdata);
+  NavierStokes2D problem(mesh_file_name, degree_velocity, degree_pressure, T, theta, delta_t, fdata);
 
   problem.run();
 

@@ -44,19 +44,19 @@ cmake_force:
 SHELL = /bin/sh
 
 # The CMake executable.
-CMAKE_COMMAND = /u/sw/toolchains/gcc-glibc/11.2.0/base/bin/cmake
+CMAKE_COMMAND = /usr/bin/cmake
 
 # The command to remove a file.
-RM = /u/sw/toolchains/gcc-glibc/11.2.0/base/bin/cmake -E rm -f
+RM = /usr/bin/cmake -E rm -f
 
 # Escaping for special characters.
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/martinaarusconi/nmpde-NavierStokes
+CMAKE_SOURCE_DIR = /home/ubuntu/shared-folder/NMPDE/nmpde-NavierStokes
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/martinaarusconi/nmpde-NavierStokes/build
+CMAKE_BINARY_DIR = /home/ubuntu/shared-folder/NMPDE/nmpde-NavierStokes/build
 
 # Include any dependencies generated for this target.
 include CMakeFiles/exercise-01.dir/depend.make
@@ -70,170 +70,247 @@ include CMakeFiles/exercise-01.dir/progress.make
 include CMakeFiles/exercise-01.dir/flags.make
 
 CMakeFiles/exercise-01.dir/src/exercise-01.cpp.o: CMakeFiles/exercise-01.dir/flags.make
-CMakeFiles/exercise-01.dir/src/exercise-01.cpp.o: /home/martinaarusconi/nmpde-NavierStokes/src/exercise-01.cpp
+CMakeFiles/exercise-01.dir/src/exercise-01.cpp.o: /home/ubuntu/shared-folder/NMPDE/nmpde-NavierStokes/src/exercise-01.cpp
 CMakeFiles/exercise-01.dir/src/exercise-01.cpp.o: CMakeFiles/exercise-01.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/martinaarusconi/nmpde-NavierStokes/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/exercise-01.dir/src/exercise-01.cpp.o"
-	/u/sw/toolchains/gcc-glibc/11.2.0/base/bin/mpicxx $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/exercise-01.dir/src/exercise-01.cpp.o -MF CMakeFiles/exercise-01.dir/src/exercise-01.cpp.o.d -o CMakeFiles/exercise-01.dir/src/exercise-01.cpp.o -c /home/martinaarusconi/nmpde-NavierStokes/src/exercise-01.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/ubuntu/shared-folder/NMPDE/nmpde-NavierStokes/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/exercise-01.dir/src/exercise-01.cpp.o"
+	/usr/bin/mpicxx $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/exercise-01.dir/src/exercise-01.cpp.o -MF CMakeFiles/exercise-01.dir/src/exercise-01.cpp.o.d -o CMakeFiles/exercise-01.dir/src/exercise-01.cpp.o -c /home/ubuntu/shared-folder/NMPDE/nmpde-NavierStokes/src/exercise-01.cpp
 
 CMakeFiles/exercise-01.dir/src/exercise-01.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/exercise-01.dir/src/exercise-01.cpp.i"
-	/u/sw/toolchains/gcc-glibc/11.2.0/base/bin/mpicxx $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/martinaarusconi/nmpde-NavierStokes/src/exercise-01.cpp > CMakeFiles/exercise-01.dir/src/exercise-01.cpp.i
+	/usr/bin/mpicxx $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/ubuntu/shared-folder/NMPDE/nmpde-NavierStokes/src/exercise-01.cpp > CMakeFiles/exercise-01.dir/src/exercise-01.cpp.i
 
 CMakeFiles/exercise-01.dir/src/exercise-01.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/exercise-01.dir/src/exercise-01.cpp.s"
-	/u/sw/toolchains/gcc-glibc/11.2.0/base/bin/mpicxx $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/martinaarusconi/nmpde-NavierStokes/src/exercise-01.cpp -o CMakeFiles/exercise-01.dir/src/exercise-01.cpp.s
+	/usr/bin/mpicxx $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/ubuntu/shared-folder/NMPDE/nmpde-NavierStokes/src/exercise-01.cpp -o CMakeFiles/exercise-01.dir/src/exercise-01.cpp.s
 
-CMakeFiles/exercise-01.dir/src/Stokes.cpp.o: CMakeFiles/exercise-01.dir/flags.make
-CMakeFiles/exercise-01.dir/src/Stokes.cpp.o: /home/martinaarusconi/nmpde-NavierStokes/src/Stokes.cpp
-CMakeFiles/exercise-01.dir/src/Stokes.cpp.o: CMakeFiles/exercise-01.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/martinaarusconi/nmpde-NavierStokes/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/exercise-01.dir/src/Stokes.cpp.o"
-	/u/sw/toolchains/gcc-glibc/11.2.0/base/bin/mpicxx $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/exercise-01.dir/src/Stokes.cpp.o -MF CMakeFiles/exercise-01.dir/src/Stokes.cpp.o.d -o CMakeFiles/exercise-01.dir/src/Stokes.cpp.o -c /home/martinaarusconi/nmpde-NavierStokes/src/Stokes.cpp
+CMakeFiles/exercise-01.dir/src/NavierStokes2D.cpp.o: CMakeFiles/exercise-01.dir/flags.make
+CMakeFiles/exercise-01.dir/src/NavierStokes2D.cpp.o: /home/ubuntu/shared-folder/NMPDE/nmpde-NavierStokes/src/NavierStokes2D.cpp
+CMakeFiles/exercise-01.dir/src/NavierStokes2D.cpp.o: CMakeFiles/exercise-01.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/ubuntu/shared-folder/NMPDE/nmpde-NavierStokes/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/exercise-01.dir/src/NavierStokes2D.cpp.o"
+	/usr/bin/mpicxx $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/exercise-01.dir/src/NavierStokes2D.cpp.o -MF CMakeFiles/exercise-01.dir/src/NavierStokes2D.cpp.o.d -o CMakeFiles/exercise-01.dir/src/NavierStokes2D.cpp.o -c /home/ubuntu/shared-folder/NMPDE/nmpde-NavierStokes/src/NavierStokes2D.cpp
 
-CMakeFiles/exercise-01.dir/src/Stokes.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/exercise-01.dir/src/Stokes.cpp.i"
-	/u/sw/toolchains/gcc-glibc/11.2.0/base/bin/mpicxx $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/martinaarusconi/nmpde-NavierStokes/src/Stokes.cpp > CMakeFiles/exercise-01.dir/src/Stokes.cpp.i
+CMakeFiles/exercise-01.dir/src/NavierStokes2D.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/exercise-01.dir/src/NavierStokes2D.cpp.i"
+	/usr/bin/mpicxx $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/ubuntu/shared-folder/NMPDE/nmpde-NavierStokes/src/NavierStokes2D.cpp > CMakeFiles/exercise-01.dir/src/NavierStokes2D.cpp.i
 
-CMakeFiles/exercise-01.dir/src/Stokes.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/exercise-01.dir/src/Stokes.cpp.s"
-	/u/sw/toolchains/gcc-glibc/11.2.0/base/bin/mpicxx $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/martinaarusconi/nmpde-NavierStokes/src/Stokes.cpp -o CMakeFiles/exercise-01.dir/src/Stokes.cpp.s
+CMakeFiles/exercise-01.dir/src/NavierStokes2D.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/exercise-01.dir/src/NavierStokes2D.cpp.s"
+	/usr/bin/mpicxx $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/ubuntu/shared-folder/NMPDE/nmpde-NavierStokes/src/NavierStokes2D.cpp -o CMakeFiles/exercise-01.dir/src/NavierStokes2D.cpp.s
 
 # Object files for target exercise-01
 exercise__01_OBJECTS = \
 "CMakeFiles/exercise-01.dir/src/exercise-01.cpp.o" \
-"CMakeFiles/exercise-01.dir/src/Stokes.cpp.o"
+"CMakeFiles/exercise-01.dir/src/NavierStokes2D.cpp.o"
 
 # External object files for target exercise-01
 exercise__01_EXTERNAL_OBJECTS =
 
 exercise-01: CMakeFiles/exercise-01.dir/src/exercise-01.cpp.o
-exercise-01: CMakeFiles/exercise-01.dir/src/Stokes.cpp.o
+exercise-01: CMakeFiles/exercise-01.dir/src/NavierStokes2D.cpp.o
 exercise-01: CMakeFiles/exercise-01.dir/build.make
-exercise-01: /u/sw/toolchains/gcc-glibc/11.2.0/pkgs/dealii/9.5.1/lib/libdeal_II.so.9.5.1
-exercise-01: /u/sw/toolchains/gcc-glibc/11.2.0/pkgs/boost/1.76.0/lib/libboost_iostreams.so
-exercise-01: /u/sw/toolchains/gcc-glibc/11.2.0/pkgs/boost/1.76.0/lib/libboost_serialization.so
-exercise-01: /u/sw/toolchains/gcc-glibc/11.2.0/pkgs/boost/1.76.0/lib/libboost_system.so
-exercise-01: /u/sw/toolchains/gcc-glibc/11.2.0/pkgs/boost/1.76.0/lib/libboost_thread.so
-exercise-01: /u/sw/toolchains/gcc-glibc/11.2.0/pkgs/boost/1.76.0/lib/libboost_regex.so
-exercise-01: /u/sw/toolchains/gcc-glibc/11.2.0/pkgs/boost/1.76.0/lib/libboost_chrono.so
-exercise-01: /u/sw/toolchains/gcc-glibc/11.2.0/pkgs/boost/1.76.0/lib/libboost_date_time.so
-exercise-01: /u/sw/toolchains/gcc-glibc/11.2.0/pkgs/boost/1.76.0/lib/libboost_atomic.so
-exercise-01: /u/sw/toolchains/gcc-glibc/11.2.0/pkgs/trilinos/15.0.0/lib/libkokkossimd.so.15.0
-exercise-01: /u/sw/toolchains/gcc-glibc/11.2.0/pkgs/trilinos/15.0.0/lib/libkokkosalgorithms.so.15.0
-exercise-01: /u/sw/toolchains/gcc-glibc/11.2.0/pkgs/trilinos/15.0.0/lib/libkokkoscontainers.so.15.0
-exercise-01: /u/sw/toolchains/gcc-glibc/11.2.0/pkgs/trilinos/15.0.0/lib/libkokkoscore.so.15.0
-exercise-01: /u/sw/toolchains/gcc-glibc/11.2.0/pkgs/trilinos/15.0.0/lib/librol.so.15.0
-exercise-01: /u/sw/toolchains/gcc-glibc/11.2.0/pkgs/trilinos/15.0.0/lib/libmuelu.so.15.0
-exercise-01: /u/sw/toolchains/gcc-glibc/11.2.0/pkgs/trilinos/15.0.0/lib/libmuelu-adapters.so.15.0
-exercise-01: /u/sw/toolchains/gcc-glibc/11.2.0/pkgs/trilinos/15.0.0/lib/libnox.so.15.0
-exercise-01: /u/sw/toolchains/gcc-glibc/11.2.0/pkgs/trilinos/15.0.0/lib/libnoxlapack.so.15.0
-exercise-01: /u/sw/toolchains/gcc-glibc/11.2.0/pkgs/trilinos/15.0.0/lib/libnoxepetra.so.15.0
-exercise-01: /u/sw/toolchains/gcc-glibc/11.2.0/pkgs/trilinos/15.0.0/lib/libloca.so.15.0
-exercise-01: /u/sw/toolchains/gcc-glibc/11.2.0/pkgs/trilinos/15.0.0/lib/liblocalapack.so.15.0
-exercise-01: /u/sw/toolchains/gcc-glibc/11.2.0/pkgs/trilinos/15.0.0/lib/liblocaepetra.so.15.0
-exercise-01: /u/sw/toolchains/gcc-glibc/11.2.0/pkgs/trilinos/15.0.0/lib/liblocathyra.so.15.0
-exercise-01: /u/sw/toolchains/gcc-glibc/11.2.0/pkgs/trilinos/15.0.0/lib/libstratimikosifpack.so.15.0
-exercise-01: /u/sw/toolchains/gcc-glibc/11.2.0/pkgs/trilinos/15.0.0/lib/libstratimikosml.so.15.0
-exercise-01: /u/sw/toolchains/gcc-glibc/11.2.0/pkgs/trilinos/15.0.0/lib/libstratimikosamesos.so.15.0
-exercise-01: /u/sw/toolchains/gcc-glibc/11.2.0/pkgs/trilinos/15.0.0/lib/libstratimikosaztecoo.so.15.0
-exercise-01: /u/sw/toolchains/gcc-glibc/11.2.0/pkgs/trilinos/15.0.0/lib/libstratimikosbelos.so.15.0
-exercise-01: /u/sw/toolchains/gcc-glibc/11.2.0/pkgs/trilinos/15.0.0/lib/libstratimikos.so.15.0
-exercise-01: /u/sw/toolchains/gcc-glibc/11.2.0/pkgs/trilinos/15.0.0/lib/libanasazi.so.15.0
-exercise-01: /u/sw/toolchains/gcc-glibc/11.2.0/pkgs/trilinos/15.0.0/lib/libanasaziepetra.so.15.0
-exercise-01: /u/sw/toolchains/gcc-glibc/11.2.0/pkgs/trilinos/15.0.0/lib/libModeLaplace.so.15.0
-exercise-01: /u/sw/toolchains/gcc-glibc/11.2.0/pkgs/trilinos/15.0.0/lib/libanasazitpetra.so.15.0
-exercise-01: /u/sw/toolchains/gcc-glibc/11.2.0/pkgs/trilinos/15.0.0/lib/libbelos.so.15.0
-exercise-01: /u/sw/toolchains/gcc-glibc/11.2.0/pkgs/trilinos/15.0.0/lib/libbelosepetra.so.15.0
-exercise-01: /u/sw/toolchains/gcc-glibc/11.2.0/pkgs/trilinos/15.0.0/lib/libbelostpetra.so.15.0
-exercise-01: /u/sw/toolchains/gcc-glibc/11.2.0/pkgs/trilinos/15.0.0/lib/libbelosxpetra.so.15.0
-exercise-01: /u/sw/toolchains/gcc-glibc/11.2.0/pkgs/trilinos/15.0.0/lib/libml.so.15.0
-exercise-01: /u/sw/toolchains/gcc-glibc/11.2.0/pkgs/trilinos/15.0.0/lib/libifpack.so.15.0
-exercise-01: /u/sw/toolchains/gcc-glibc/11.2.0/pkgs/trilinos/15.0.0/lib/libamesos.so.15.0
-exercise-01: /u/sw/toolchains/gcc-glibc/11.2.0/pkgs/trilinos/15.0.0/lib/libgaleri-epetra.so.15.0
-exercise-01: /u/sw/toolchains/gcc-glibc/11.2.0/pkgs/trilinos/15.0.0/lib/libgaleri-xpetra.so.15.0
-exercise-01: /u/sw/toolchains/gcc-glibc/11.2.0/pkgs/trilinos/15.0.0/lib/libaztecoo.so.15.0
-exercise-01: /u/sw/toolchains/gcc-glibc/11.2.0/pkgs/trilinos/15.0.0/lib/libisorropia.so.15.0
-exercise-01: /u/sw/toolchains/gcc-glibc/11.2.0/pkgs/trilinos/15.0.0/lib/libxpetra.so.15.0
-exercise-01: /u/sw/toolchains/gcc-glibc/11.2.0/pkgs/trilinos/15.0.0/lib/libxpetra-sup.so.15.0
-exercise-01: /u/sw/toolchains/gcc-glibc/11.2.0/pkgs/trilinos/15.0.0/lib/libthyracore.so.15.0
-exercise-01: /u/sw/toolchains/gcc-glibc/11.2.0/pkgs/trilinos/15.0.0/lib/libthyraepetra.so.15.0
-exercise-01: /u/sw/toolchains/gcc-glibc/11.2.0/pkgs/trilinos/15.0.0/lib/libthyraepetraext.so.15.0
-exercise-01: /u/sw/toolchains/gcc-glibc/11.2.0/pkgs/trilinos/15.0.0/lib/libthyratpetra.so.15.0
-exercise-01: /u/sw/toolchains/gcc-glibc/11.2.0/pkgs/trilinos/15.0.0/lib/libtrilinosss.so.15.0
-exercise-01: /u/sw/toolchains/gcc-glibc/11.2.0/pkgs/trilinos/15.0.0/lib/libkokkostsqr.so.15.0
-exercise-01: /u/sw/toolchains/gcc-glibc/11.2.0/pkgs/trilinos/15.0.0/lib/libtpetraclassic.so.15.0
-exercise-01: /u/sw/toolchains/gcc-glibc/11.2.0/pkgs/trilinos/15.0.0/lib/libtpetra.so.15.0
-exercise-01: /u/sw/toolchains/gcc-glibc/11.2.0/pkgs/trilinos/15.0.0/lib/libtpetrainout.so.15.0
-exercise-01: /u/sw/toolchains/gcc-glibc/11.2.0/pkgs/trilinos/15.0.0/lib/libtpetraext.so.15.0
-exercise-01: /u/sw/toolchains/gcc-glibc/11.2.0/pkgs/trilinos/15.0.0/lib/libepetraext.so.15.0
-exercise-01: /u/sw/toolchains/gcc-glibc/11.2.0/pkgs/trilinos/15.0.0/lib/libtriutils.so.15.0
-exercise-01: /u/sw/toolchains/gcc-glibc/11.2.0/pkgs/trilinos/15.0.0/lib/libzoltan.so.15.0
-exercise-01: /u/sw/toolchains/gcc-glibc/11.2.0/pkgs/trilinos/15.0.0/lib/libepetra.so.15.0
-exercise-01: /u/sw/toolchains/gcc-glibc/11.2.0/pkgs/trilinos/15.0.0/lib/libsacado.so.15.0
-exercise-01: /u/sw/toolchains/gcc-glibc/11.2.0/pkgs/trilinos/15.0.0/lib/librtop.so.15.0
-exercise-01: /u/sw/toolchains/gcc-glibc/11.2.0/pkgs/trilinos/15.0.0/lib/libkokkoskernels.so.15.0
-exercise-01: /u/sw/toolchains/gcc-glibc/11.2.0/pkgs/trilinos/15.0.0/lib/libteuchoscore.so.15.0
-exercise-01: /u/sw/toolchains/gcc-glibc/11.2.0/pkgs/trilinos/15.0.0/lib/libteuchosparser.so.15.0
-exercise-01: /u/sw/toolchains/gcc-glibc/11.2.0/pkgs/trilinos/15.0.0/lib/libteuchosparameterlist.so.15.0
-exercise-01: /u/sw/toolchains/gcc-glibc/11.2.0/pkgs/trilinos/15.0.0/lib/libteuchoscomm.so.15.0
-exercise-01: /u/sw/toolchains/gcc-glibc/11.2.0/pkgs/trilinos/15.0.0/lib/libteuchosnumerics.so.15.0
-exercise-01: /u/sw/toolchains/gcc-glibc/11.2.0/pkgs/trilinos/15.0.0/lib/libteuchosremainder.so.15.0
-exercise-01: /u/sw/toolchains/gcc-glibc/11.2.0/pkgs/trilinos/15.0.0/lib/libteuchoskokkoscompat.so.15.0
-exercise-01: /u/sw/toolchains/gcc-glibc/11.2.0/pkgs/trilinos/15.0.0/lib/libteuchoskokkoscomm.so.15.0
-exercise-01: /u/sw/toolchains/gcc-glibc/11.2.0/prefix/lib/libpthread.so
-exercise-01: /u/sw/toolchains/gcc-glibc/11.2.0/base/lib/libhwloc.so
-exercise-01: /u/sw/toolchains/gcc-glibc/11.2.0/pkgs/tbb/2021.4.0/lib/libtbb.so
-exercise-01: /u/sw/toolchains/gcc-glibc/11.2.0/pkgs/blacs/1.1/lib/libblacs.so
-exercise-01: /u/sw/toolchains/gcc-glibc/11.2.0/pkgs/blacs/1.1/lib/libblacsF77init.so
-exercise-01: /u/sw/toolchains/gcc-glibc/11.2.0/pkgs/adol-c/2.7.2/lib64/libadolc.so
-exercise-01: /u/sw/toolchains/gcc-glibc/11.2.0/pkgs/arpack/3.8.0/lib/libarpack.so
-exercise-01: /u/sw/toolchains/gcc-glibc/11.2.0/pkgs/gsl/2.7/lib/libgsl.so
-exercise-01: /u/sw/toolchains/gcc-glibc/11.2.0/pkgs/gsl/2.7/lib/libgslcblas.so
-exercise-01: /u/sw/toolchains/gcc-glibc/11.2.0/pkgs/petsc/3.15.1/lib/libslepc.so
-exercise-01: /u/sw/toolchains/gcc-glibc/11.2.0/pkgs/petsc/3.15.1/lib/libpetsc.so
-exercise-01: /u/sw/toolchains/gcc-glibc/11.2.0/pkgs/hypre/2.22.0/lib/libHYPRE.so
-exercise-01: /u/sw/toolchains/gcc-glibc/11.2.0/pkgs/mumps/5.4.0/lib/libcmumps.so
-exercise-01: /u/sw/toolchains/gcc-glibc/11.2.0/pkgs/mumps/5.4.0/lib/libdmumps.so
-exercise-01: /u/sw/toolchains/gcc-glibc/11.2.0/pkgs/mumps/5.4.0/lib/libsmumps.so
-exercise-01: /u/sw/toolchains/gcc-glibc/11.2.0/pkgs/mumps/5.4.0/lib/libzmumps.so
-exercise-01: /u/sw/toolchains/gcc-glibc/11.2.0/pkgs/mumps/5.4.0/lib/libmumps_common.so
-exercise-01: /u/sw/toolchains/gcc-glibc/11.2.0/pkgs/mumps/5.4.0/lib/libpord.so
-exercise-01: /u/sw/toolchains/gcc-glibc/11.2.0/pkgs/scalapack/2.1.0/lib/libscalapack.so
-exercise-01: /u/sw/toolchains/gcc-glibc/11.2.0/pkgs/suitesparse/5.10.1/lib/libumfpack.so
-exercise-01: /u/sw/toolchains/gcc-glibc/11.2.0/pkgs/suitesparse/5.10.1/lib/libklu.so
-exercise-01: /u/sw/toolchains/gcc-glibc/11.2.0/pkgs/suitesparse/5.10.1/lib/libcholmod.so
-exercise-01: /u/sw/toolchains/gcc-glibc/11.2.0/pkgs/suitesparse/5.10.1/lib/libbtf.so
-exercise-01: /u/sw/toolchains/gcc-glibc/11.2.0/pkgs/suitesparse/5.10.1/lib/libccolamd.so
-exercise-01: /u/sw/toolchains/gcc-glibc/11.2.0/pkgs/suitesparse/5.10.1/lib/libcolamd.so
-exercise-01: /u/sw/toolchains/gcc-glibc/11.2.0/pkgs/suitesparse/5.10.1/lib/libcamd.so
-exercise-01: /u/sw/toolchains/gcc-glibc/11.2.0/pkgs/suitesparse/5.10.1/lib/libamd.so
-exercise-01: /u/sw/toolchains/gcc-glibc/11.2.0/pkgs/suitesparse/5.10.1/lib/libsuitesparseconfig.so
-exercise-01: /u/sw/toolchains/gcc-glibc/11.2.0/pkgs/fftw/3.3.9/lib/libfftw3_mpi.so
-exercise-01: /u/sw/toolchains/gcc-glibc/11.2.0/pkgs/fftw/3.3.9/lib/libfftw3.so
-exercise-01: /u/sw/toolchains/gcc-glibc/11.2.0/pkgs/p4est/2.3.2/lib/libp4est.so
-exercise-01: /u/sw/toolchains/gcc-glibc/11.2.0/pkgs/p4est/2.3.2/lib/libsc.so
-exercise-01: /u/sw/toolchains/gcc-glibc/11.2.0/pkgs/openblas/0.3.15/lib/libopenblas.so
-exercise-01: /u/sw/toolchains/gcc-glibc/11.2.0/pkgs/scotch/6.1.1/lib/libptesmumps.so
-exercise-01: /u/sw/toolchains/gcc-glibc/11.2.0/pkgs/scotch/6.1.1/lib/libptscotchparmetis.so
-exercise-01: /u/sw/toolchains/gcc-glibc/11.2.0/pkgs/scotch/6.1.1/lib/libptscotch.so
-exercise-01: /u/sw/toolchains/gcc-glibc/11.2.0/pkgs/scotch/6.1.1/lib/libptscotcherr.so
-exercise-01: /u/sw/toolchains/gcc-glibc/11.2.0/pkgs/scotch/6.1.1/lib/libesmumps.so
-exercise-01: /u/sw/toolchains/gcc-glibc/11.2.0/pkgs/scotch/6.1.1/lib/libscotch.so
-exercise-01: /u/sw/toolchains/gcc-glibc/11.2.0/pkgs/scotch/6.1.1/lib/libscotcherr.so
-exercise-01: /u/sw/toolchains/gcc-glibc/11.2.0/pkgs/netcdf/4.9.2/lib/libnetcdf.so
-exercise-01: /u/sw/toolchains/gcc-glibc/11.2.0/pkgs/hdf5/1.12.0/lib/libhdf5hl_fortran.so
-exercise-01: /u/sw/toolchains/gcc-glibc/11.2.0/pkgs/hdf5/1.12.0/lib/libhdf5_fortran.so
-exercise-01: /u/sw/toolchains/gcc-glibc/11.2.0/pkgs/metis/5.1.0/lib/libmetis.so
-exercise-01: /u/sw/toolchains/gcc-glibc/11.2.0/pkgs/hdf5/1.12.0/lib/libhdf5_hl.so
-exercise-01: /u/sw/toolchains/gcc-glibc/11.2.0/pkgs/hdf5/1.12.0/lib/libhdf5.so
-exercise-01: /u/sw/toolchains/gcc-glibc/11.2.0/pkgs/metis/5.1.0/lib/libparmetis.so
-exercise-01: /u/sw/toolchains/gcc-glibc/11.2.0/base/lib/libz.so
-exercise-01: /u/sw/toolchains/gcc-glibc/11.2.0/base/lib/libbz2.so
-exercise-01: /u/sw/toolchains/gcc-glibc/11.2.0/base/lib/libmpi_usempif08.so
-exercise-01: /u/sw/toolchains/gcc-glibc/11.2.0/base/lib/libmpi_usempi_ignore_tkr.so
-exercise-01: /u/sw/toolchains/gcc-glibc/11.2.0/base/lib/libmpi_mpifh.so
-exercise-01: /u/sw/toolchains/gcc-glibc/11.2.0/base/lib/libmpi.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libdeal.ii.so.9.5.1
+exercise-01: /usr/lib/x86_64-linux-gnu/libtbb.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libtrilinos_pike-blackbox.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libtrilinos_trilinoscouplings.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libtrilinos_piro.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libtrilinos_rol.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libtrilinos_stokhos_muelu.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libtrilinos_stokhos_muelu_pce_serial.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libtrilinos_stokhos_muelu_mp_16_serial.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libtrilinos_stokhos_ifpack2.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libtrilinos_stokhos_ifpack2_pce_serial.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libtrilinos_stokhos_ifpack2_mp_16_serial.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libtrilinos_stokhos_amesos2.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libtrilinos_stokhos_xpetra.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libtrilinos_stokhos_xpetra_pce_serial.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libtrilinos_stokhos_xpetra_mp_16_serial.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libtrilinos_stokhos_tpetra.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libtrilinos_stokhos_tpetraext_pce_serial.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libtrilinos_stokhos_tpetra_pce_serial.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libtrilinos_stokhos_tpetra_sd_pce_serial.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libtrilinos_stokhos_tpetraext_mp_16_serial.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libtrilinos_stokhos_tpetra_mp_16_serial.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libtrilinos_stokhos_tpetra_sd_mp_16_serial.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libtrilinos_stokhos_sacado.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libtrilinos_stokhos.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libtrilinos_rythmos.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libtrilinos_shylu_ddcommon.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libtrilinos_shylu_ddfrosch.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libtrilinos_shylu_ddbddc.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libtrilinos_zoltan2sphynx.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libtrilinos_muelu-adapters.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libtrilinos_muelu-interface.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libtrilinos_muelu.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libtrilinos_moertel.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libtrilinos_locatpetra.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libtrilinos_locathyra.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libtrilinos_locaepetra.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libtrilinos_localapack.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libtrilinos_loca.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libtrilinos_noxepetra.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libtrilinos_noxlapack.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libtrilinos_nox.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libtrilinos_phalanx.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libtrilinos_intrepid2.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libtrilinos_intrepid.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libtrilinos_teko.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libtrilinos_stratimikos.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libtrilinos_stratimikosbelos.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libtrilinos_stratimikosamesos2.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libtrilinos_stratimikosaztecoo.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libtrilinos_stratimikosamesos.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libtrilinos_stratimikosml.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libtrilinos_stratimikosifpack.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libtrilinos_ifpack2-adapters.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libtrilinos_ifpack2.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libtrilinos_anasazitpetra.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libtrilinos_ModeLaplace.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libtrilinos_anasaziepetra.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libtrilinos_anasazi.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libtrilinos_komplex.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libtrilinos_amesos2.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libtrilinos_tacho.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libtrilinos_shylu_nodehts.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libtrilinos_belosxpetra.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libtrilinos_belostpetra.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libtrilinos_belosepetra.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libtrilinos_belos.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libtrilinos_ml.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libtrilinos_ifpack.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libtrilinos_zoltan2.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libtrilinos_pamgen_extras.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libtrilinos_pamgen.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libtrilinos_amesos.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libtrilinos_galeri-xpetra.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libtrilinos_galeri-epetra.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libtrilinos_aztecoo.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libtrilinos_dpliris.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libtrilinos_isorropia.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libtrilinos_xpetra-sup.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libtrilinos_xpetra.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libtrilinos_thyratpetra.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libtrilinos_thyraepetraext.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libtrilinos_thyraepetra.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libtrilinos_thyracore.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libtrilinos_trilinosss.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libtrilinos_tpetraext.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libtrilinos_tpetrainout.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libtrilinos_tpetra.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libtrilinos_kokkostsqr.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libtrilinos_tpetraclassiclinalg.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libtrilinos_tpetraclassicnodeapi.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libtrilinos_tpetraclassic.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libtrilinos_epetraext.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libtrilinos_triutils.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libtrilinos_shards.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libtrilinos_zoltan.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libtrilinos_epetra.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libtrilinos_sacado.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libtrilinos_rtop.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libtrilinos_kokkoskernels.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libtrilinos_teuchoskokkoscomm.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libtrilinos_teuchoskokkoscompat.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libtrilinos_teuchosremainder.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libtrilinos_teuchosnumerics.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libtrilinos_teuchoscomm.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libtrilinos_teuchosparameterlist.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libtrilinos_teuchosparser.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libtrilinos_teuchoscore.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libtrilinos_kokkosalgorithms.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libtrilinos_kokkoscontainers.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libtrilinos_kokkoscore.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libsmumps.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libdmumps.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libcmumps.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libzmumps.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libpord.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libmumps_common.so
+exercise-01: /usr/lib/x86_64-linux-gnu/hdf5/openmpi/libhdf5.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libptscotch.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libptscotcherr.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libscotch.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libscotcherr.so
+exercise-01: /usr/lib/x86_64-linux-gnu/openmpi/lib/libmpi_cxx.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libumfpack.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libcholmod.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libccolamd.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libcolamd.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libcamd.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libsuitesparseconfig.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libamd.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libmetis.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libadolc.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libboost_iostreams.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libboost_serialization.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libboost_system.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libboost_thread.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libboost_regex.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libboost_chrono.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libboost_atomic.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libparpack.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libarpack.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libassimp.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libgmpxx.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libmpfr.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libgmp.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libgmsh.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libgsl.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libgslcblas.so
+exercise-01: /usr/lib/x86_64-linux-gnu/hdf5/openmpi/lib/libhdf5.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libcrypto.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libcurl.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libsz.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libdl.a
+exercise-01: /usr/lib/x86_64-linux-gnu/libmuparser.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libTKBO.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libTKBool.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libTKBRep.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libTKernel.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libTKFeat.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libTKFillet.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libTKG2d.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libTKG3d.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libTKGeomAlgo.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libTKGeomBase.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libTKHLR.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libTKIGES.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libTKMath.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libTKMesh.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libTKOffset.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libTKPrim.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libTKShHealing.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libTKSTEP.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libTKSTEPAttr.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libTKSTEPBase.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libTKSTEP209.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libTKSTL.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libTKTopAlgo.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libTKXSBase.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libp4est.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libsc.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libscalapack-openmpi.so
+exercise-01: /usr/lib/x86_64-linux-gnu/liblapack.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libblas.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libmpi_usempif08.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libmpi_usempi_ignore_tkr.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libmpi_mpifh.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libopen-rte.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libopen-pal.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libhwloc.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libevent_core.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libevent_pthreads.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libm.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libz.so
+exercise-01: /usr/lib/x86_64-linux-gnu/openmpi/lib/libmpi.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libslepc.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libpetsc.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libsundials_idas.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libsundials_arkode.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libsundials_kinsol.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libsundials_nvecserial.so
+exercise-01: /usr/lib/x86_64-linux-gnu/libsundials_nvecparallel.so
 exercise-01: CMakeFiles/exercise-01.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/home/martinaarusconi/nmpde-NavierStokes/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Linking CXX executable exercise-01"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/home/ubuntu/shared-folder/NMPDE/nmpde-NavierStokes/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Linking CXX executable exercise-01"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/exercise-01.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
@@ -245,6 +322,6 @@ CMakeFiles/exercise-01.dir/clean:
 .PHONY : CMakeFiles/exercise-01.dir/clean
 
 CMakeFiles/exercise-01.dir/depend:
-	cd /home/martinaarusconi/nmpde-NavierStokes/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/martinaarusconi/nmpde-NavierStokes /home/martinaarusconi/nmpde-NavierStokes /home/martinaarusconi/nmpde-NavierStokes/build /home/martinaarusconi/nmpde-NavierStokes/build /home/martinaarusconi/nmpde-NavierStokes/build/CMakeFiles/exercise-01.dir/DependInfo.cmake "--color=$(COLOR)"
+	cd /home/ubuntu/shared-folder/NMPDE/nmpde-NavierStokes/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/ubuntu/shared-folder/NMPDE/nmpde-NavierStokes /home/ubuntu/shared-folder/NMPDE/nmpde-NavierStokes /home/ubuntu/shared-folder/NMPDE/nmpde-NavierStokes/build /home/ubuntu/shared-folder/NMPDE/nmpde-NavierStokes/build /home/ubuntu/shared-folder/NMPDE/nmpde-NavierStokes/build/CMakeFiles/exercise-01.dir/DependInfo.cmake "--color=$(COLOR)"
 .PHONY : CMakeFiles/exercise-01.dir/depend
 
