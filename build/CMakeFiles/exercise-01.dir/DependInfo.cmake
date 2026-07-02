@@ -8,8 +8,8 @@ set(CMAKE_DEPENDS_LANGUAGES
 
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
-  "/home/ubuntu/shared-folder/NMPDE/nmpde-NavierStokes/src/NavierStokes2D.cpp" "CMakeFiles/exercise-01.dir/src/NavierStokes2D.cpp.o" "gcc" "CMakeFiles/exercise-01.dir/src/NavierStokes2D.cpp.o.d"
-  "/home/ubuntu/shared-folder/NMPDE/nmpde-NavierStokes/src/exercise-01.cpp" "CMakeFiles/exercise-01.dir/src/exercise-01.cpp.o" "gcc" "CMakeFiles/exercise-01.dir/src/exercise-01.cpp.o.d"
+  "/home/micaela_perlini/PDEs/PROJECT2/nmpde-NavierStokes/src/NavierStokes2D.cpp" "CMakeFiles/exercise-01.dir/src/NavierStokes2D.cpp.o" "gcc" "CMakeFiles/exercise-01.dir/src/NavierStokes2D.cpp.o.d"
+  "/home/micaela_perlini/PDEs/PROJECT2/nmpde-NavierStokes/src/exercise-01.cpp" "CMakeFiles/exercise-01.dir/src/exercise-01.cpp.o" "gcc" "CMakeFiles/exercise-01.dir/src/exercise-01.cpp.o.d"
   )
 
 # Targets to which this target links which contain Fortran sources.

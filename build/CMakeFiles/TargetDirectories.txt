@@ -1,3 +1,3 @@
-/home/ubuntu/shared-folder/NMPDE/nmpde-NavierStokes/build/CMakeFiles/exercise-01.dir
-/home/ubuntu/shared-folder/NMPDE/nmpde-NavierStokes/build/CMakeFiles/edit_cache.dir
-/home/ubuntu/shared-folder/NMPDE/nmpde-NavierStokes/build/CMakeFiles/rebuild_cache.dir
+/home/micaela_perlini/PDEs/PROJECT2/nmpde-NavierStokes/build/CMakeFiles/exercise-01.dir
+/home/micaela_perlini/PDEs/PROJECT2/nmpde-NavierStokes/build/CMakeFiles/edit_cache.dir
+/home/micaela_perlini/PDEs/PROJECT2/nmpde-NavierStokes/build/CMakeFiles/rebuild_cache.dir

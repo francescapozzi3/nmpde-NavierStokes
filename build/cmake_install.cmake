@@ -1,4 +1,4 @@
-# Install script for directory: /home/ubuntu/shared-folder/NMPDE/nmpde-NavierStokes
+# Install script for directory: /home/micaela_perlini/PDEs/PROJECT2/nmpde-NavierStokes
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -39,7 +39,7 @@ endif()
 
 # Set default install directory permissions.
 if(NOT DEFINED CMAKE_OBJDUMP)
-  set(CMAKE_OBJDUMP "/usr/bin/objdump")
+  set(CMAKE_OBJDUMP "/u/sw/toolchains/gcc-glibc/11.2.0/prefix/bin/objdump")
 endif()
 
 if(CMAKE_INSTALL_COMPONENT)
@@ -50,5 +50,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "/home/ubuntu/shared-folder/NMPDE/nmpde-NavierStokes/build/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "/home/micaela_perlini/PDEs/PROJECT2/nmpde-NavierStokes/build/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")
