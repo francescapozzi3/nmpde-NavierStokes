@@ -1,5 +1,5 @@
-#ifndef NAVIER_STOKES_2D_HPP
-#define NAVIER_STOKES_2D_HPP
+#ifndef NAVIER_STOKES_3D_HPP
+#define NAVIER_STOKES_3D_HPP
 
 #include <limits>
 #include <utility>
@@ -40,11 +40,11 @@
 using namespace dealii;
 
 // Class implementing a solver for the Stokes problem.
-class NavierStokes2D
+class NavierStokes3D
 {
 public:
   // Physical dimension (1D, 2D, 3D)
-  static constexpr unsigned int dim = 2;
+  static constexpr unsigned int dim = 3;
 
     struct ProblemData
   {
@@ -234,7 +234,7 @@ public:
 
 
   // Constructor.
-  NavierStokes2D(const std::string                               &mesh_file_name_,
+  NavierStokes3D(const std::string                               &mesh_file_name_,
                  const unsigned int                              &degree_velocity_,
                  const unsigned int                              &degree_pressure_,
                  const double                                    &T_,
@@ -393,12 +393,14 @@ protected:
   TrilinosWrappers::MPI::BlockVector solution;
 
   // Physical constants for the benchmark.
-  static constexpr double D_cylinder = 0.1;
+  static constexpr double D_cylinder = 0.1;  // 2*R_cylinder
+  static constexpr double H_channel  = 0.41; // channel height
 
-  // 2D benchmark points.
-  static constexpr double x_front_cylinder = 0.15;
-  static constexpr double y_probe          = 0.20;
-  static constexpr double x_back_cylinder  = 0.25;
+  // 3D benchmark points.
+  static constexpr double x_front_cylinder = 0.45;   // cx - R_cylinder
+  static constexpr double y_probe          = 0.20;   // cy
+  static constexpr double z_probe          = 0.205;  // W\2
+  static constexpr double x_back_cylinder  = 0.55;   // cx + R_cylinder
 
   // Search interval for the recirculation zone.
   static constexpr double x_wake_start = x_back_cylinder;
@@ -406,8 +408,8 @@ protected:
 
   double reference_velocity() const
   {
-    // From the benchmark: U = 2 U(0,H/2,t) / 3.
-    return 2.0 * data.Um / 3.0;
+    // From the benchmark: U = 4 U(0,H/2,W/2,t) / 9.
+    return 4.0 * data.Um / 9.0;
   }
 
 };

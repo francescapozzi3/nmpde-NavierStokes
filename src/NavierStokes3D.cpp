@@ -1,7 +1,7 @@
-#include "NavierStokes2D.hpp"
+#include "NavierStokes3D.hpp"
 
 void
-NavierStokes2D::setup()
+NavierStokes3D::setup()
 {
   // Create the mesh.
   {
@@ -157,7 +157,7 @@ NavierStokes2D::setup()
 }
 
 void
-NavierStokes2D::assemble()
+NavierStokes3D::assemble()
 {
   // pcout << "===============================================" << std::endl;
   pcout << "  Assembling the system" << std::endl;
@@ -193,7 +193,7 @@ NavierStokes2D::assemble()
 
   // Evaluation of the gradient of the old solution on quadrature nodes of
   // current cell.
-  std::vector<Tensor<dim, dim>> solution_old_grads(n_q);
+  std::vector<Tensor<dim-1, dim>> solution_old_grads(n_q);
 
   for (const auto &cell : dof_handler.active_cell_iterators())
     {
@@ -349,7 +349,7 @@ NavierStokes2D::assemble()
 }
 
 void
-NavierStokes2D::solve()
+NavierStokes3D::solve()
 {
   //pcout << "===============================================" << std::endl;
 
@@ -371,7 +371,7 @@ NavierStokes2D::solve()
 }
 
 void
-NavierStokes2D::output()
+NavierStokes3D::output()
 {
   pcout << "===============================================" << std::endl;
 
@@ -394,7 +394,7 @@ NavierStokes2D::output()
 
   data_out.build_patches();
 
-  const std::string output_file_name = "output-navier-stokes-2D";
+  const std::string output_file_name = "output-navier-stokes-3D";
   data_out.write_vtu_with_pvtu_record(/* folder = */ "./",
                                       /* basename = */ output_file_name,
                                       /* index = */ timestep_number,
@@ -405,7 +405,7 @@ NavierStokes2D::output()
 }
 
 void
-NavierStokes2D::run()
+NavierStokes3D::run()
 {
   // Setup initial conditions.
   {
@@ -450,7 +450,7 @@ NavierStokes2D::run()
       {
         const auto [drag, lift] = compute_drag_lift_forces();
         const double U   = reference_velocity();
-        const double fac = 2.0 / (data.rho * U * U * D_cylinder);
+        const double fac = 2.0 / (data.rho * U * U * D_cylinder * H_channel);
 
         const double cD = fac * drag;
         const double cL = fac * lift;
@@ -491,15 +491,15 @@ NavierStokes2D::run()
       std::ofstream out("benchmark_quantities.csv");
       if (data.choice == 1)
       {
-        out << "Re,cD,cL,La,DeltaP\n"
+        out << "Re,cD,cL,DeltaP\n"
             << res.Re << "," << res.cD << "," << res.cL << ","
-            << res.La << "," << res.dP << "\n";
+            << res.dP << "\n";
       }
       else if (data.choice == 2)
       {
-        out << "Re,cDmax,cLmax,St,DeltaP_half_period\n"
+        out << "Re,cDmax,cLmax,St\n"
             << res.Re << "," << res.cD_max << "," << res.cL_max << ","
-            << res.St << "," << res.dP_half << "\n";
+            << res.St << "\n";
       }
       else if (data.choice == 3)
       {
@@ -519,7 +519,7 @@ NavierStokes2D::run()
     }
     if (data.choice == 3)
     {
-      std::ofstream out("time_series_2D3.csv");
+      std::ofstream out("time_series_3D3.csv");
       out << "time,cD,cL,deltaP\n";
       for (unsigned int i = 0; i < time_history.size(); ++i)
         out << time_history[i] << "," << cD_history[i] << ","
@@ -533,7 +533,7 @@ NavierStokes2D::run()
 
 
 std::pair<double, double>
-NavierStokes2D::compute_drag_lift_forces() const
+NavierStokes3D::compute_drag_lift_forces() const
 {
 
   // FEFaceValues object for integration over boundary faces
@@ -550,13 +550,14 @@ NavierStokes2D::compute_drag_lift_forces() const
   const unsigned int n_q_face = quadrature_face->size();
 
   // Buffers for solution values at face quadrature points
-  std::vector<Tensor<1, dim>> velocity_values(n_q_face); // u at quadrature point q
+  //std::vector<Tensor<1, dim>> velocity_values(n_q_face); // u at quadrature point q
   std::vector<Tensor<2, dim>> velocity_grads(n_q_face); // ∇u at quadrature point q
   std::vector<double> pressure_values(n_q_face); // p at quadrature point q
 
-  // local accumulator for the drag and lift force
+  // Local accumulator for the drag and lift force
   double drag = 0.0;
   double lift = 0.0;
+  double side = 0.0;  // z component to check symmetry
 
   for (const auto &cell : dof_handler.active_cell_iterators())
     {
@@ -580,7 +581,7 @@ NavierStokes2D::compute_drag_lift_forces() const
           fe_face_values.reinit(cell, f);
 
           // Extract velocity values, gradients, and pressure from the solution vector
-          fe_face_values[velocity].get_function_values(solution, velocity_values);
+          //fe_face_values[velocity].get_function_values(solution, velocity_values);
           fe_face_values[velocity].get_function_gradients(solution, velocity_grads);
           fe_face_values[pressure].get_function_values(solution, pressure_values);
 
@@ -592,37 +593,25 @@ NavierStokes2D::compute_drag_lift_forces() const
               // so we flip it to get the normal pointing outward from the cylinder into the fluid.
               const Tensor<1, dim> n = -fe_face_values.normal_vector(q);
 
-              // // Tangent vector obtained by rotating n by 90°: t = (ny, -nx)
-              Tensor<1, dim> t;
-              t[0] =  n[1];
-              t[1] = -n[0];
-
-              // Derivative of the tangential velocity in the normal direction:
-              // ∂v_t/∂n = n · ∇(u · t) = Σ_i Σ_j n_i (∂u_j/∂x_i) t_j
-              double dvt_dn = 0.0;
-              for (unsigned int i = 0; i < dim; ++i)
-                for (unsigned int j = 0; j < dim; ++j)
-                  dvt_dn += n[i] * velocity_grads[q][j][i] * t[j];
-
-              // p = pressure at the current quadrature point
+              // Pressure at the quadrature point
               const double p = pressure_values[q];
 
-              // Elementary drag contribution (force in the x-direction):
-              // FD = ∫ (ρν ∂v_t/∂n * ny - p * nx) dS
-              const double dF_D =
-                (data.rho * data.nu * dvt_dn * n[1] - p * n[0]) *
-                fe_face_values.JxW(q);
+              // Gradient of velocity at the quadrature point
+              const Tensor<2, dim> &grad_u = velocity_grads[q];
 
-              // Elementary lift contribution (force in the y-direction):
-              // FL = -∫ (ρν ∂v_t/∂n * nx + p * ny) dS
-              // Minus sign from the sign convention for the lift projection onto e_y
-              const double dF_L =
-                -(data.rho * data.nu * dvt_dn * n[0] + p * n[1]) *
-                fe_face_values.JxW(q);
+              // Traction: t = sigma . n = -p n + rho*nu*(grad_u + grad_u^T) n
+              Tensor<1, dim> traction;
+              for (unsigned int i = 0; i < dim; ++i)
+                {
+                  traction[i] = -p * n[i];
+                  for (unsigned int j = 0; j < dim; ++j)
+                    traction[i] += data.rho * data.nu *
+                                   (grad_u[i][j] + grad_u[j][i]) * n[j];
+                }
 
-              /// accumulate local drag and lift contribution
-              drag += dF_D;
-              lift += dF_L;
+              drag += traction[0] * fe_face_values.JxW(q);
+              lift += traction[1] * fe_face_values.JxW(q);
+              side += traction[2] * fe_face_values.JxW(q);
             }
 
         }
@@ -632,16 +621,19 @@ NavierStokes2D::compute_drag_lift_forces() const
   // Sum contributions across MPI tasks.
   const double drag_global = Utilities::MPI::sum(drag, MPI_COMM_WORLD);
   const double lift_global = Utilities::MPI::sum(lift, MPI_COMM_WORLD);
+  const double side_global = Utilities::MPI::sum(side, MPI_COMM_WORLD);
+
+  // We can ignore the side force, but we can check that it is small (ideally zero) to verify symmetry.
+  // pcout << "  [check] side force (z) = " << side_global << std::endl;
+  (void) side_global;
 
   return {drag_global, lift_global};
 }
 
 
 double
-NavierStokes2D::compute_pressure_difference() const
+NavierStokes3D::compute_pressure_difference() const
 {
-  // Build a linear (P1) mapping required by VectorTools::point_value on simplex meshes
-  // Must use MappingFE with a scalar FE
   const FE_SimplexP<dim> fe_map(1);
   const MappingFE<dim>   mapping(fe_map);
 
@@ -655,7 +647,6 @@ NavierStokes2D::compute_pressure_difference() const
 
     try
       {
-        // buffer for all components (u_x, u_y, p)
         Vector<double> values(fe->n_components());
         // Evaluates the solution at point p; throws if the point is not on this MPI process
         VectorTools::point_value(mapping, dof_handler, solution, p, values);
@@ -667,15 +658,15 @@ NavierStokes2D::compute_pressure_difference() const
           // The point belongs to another MPI process: local_value stays 0
       }
 
-      // MPI reduction: sum across processes (only one will have local_value ≠ 0)
-         return Utilities::MPI::sum(local_value, MPI_COMM_WORLD);
+    // MPI reduction: sum across processes (only one will have local_value ≠ 0)
+    return Utilities::MPI::sum(local_value, MPI_COMM_WORLD);
 
   };
 
-  // Sampling point at the front of the cylinder (upstream side, at centerline height)
-  const Point<dim> p_front(x_front_cylinder, y_probe);
-  // Sampling point at the rear of the cylinder (downstream side, at centerline height)
-  const Point<dim> p_back(x_back_cylinder,   y_probe);
+  // Sampling point at the front of the cylinder 
+  const Point<dim> p_front(x_front_cylinder, y_probe, z_probe);
+  // Sampling point at the rear of the cylinder 
+  const Point<dim> p_back(x_back_cylinder, y_probe, z_probe);
 
   // pressure upstream and downstream of the cylinder
   const double p1 = get_pressure_at_point(p_front);
@@ -686,21 +677,23 @@ NavierStokes2D::compute_pressure_difference() const
 }
 
 
-  double NavierStokes2D::compute_recirculation_length() const 
+/*
+double NavierStokes3D::compute_recirculation_length() const 
 { 
   const FE_SimplexP<dim> fe_map(1);  
   const MappingFE<dim>   mapping(fe_map);
   const unsigned int n_samples = 400; 
   // fixed y-coordinate (cylinder centerline)
   const double y = y_probe; 
+  const double z = z_probe;
 
-  // Lambda: returns the x-component of velocity at point (x, y)
+  // Lambda: returns the x-component of velocity at point (x, y, z)
   auto u_x_at = [&](const double x) -> double { 
     double local_value = 0.0;
     try
       {
         Vector<double> values(fe->n_components()); 
-        const Point<dim> p(x, y); 
+        const Point<dim> p(x, y, z); 
         VectorTools::point_value(mapping, dof_handler, solution, p, values); 
         local_value = values[0]; // x-component u_x
       }
@@ -714,8 +707,8 @@ NavierStokes2D::compute_pressure_difference() const
   // First sampling point: just past the rear edge of the cylinder (small offset to avoid boundary)
   double x_prev = x_wake_start + 1e-6; 
   double u_prev = u_x_at(x_prev); 
-  for (unsigned int k = 1; k <= n_samples; ++k) { 
 
+  for (unsigned int k = 1; k <= n_samples; ++k) { 
     // Sample uniformly from x_back_cylinder+0.005 to x_wake_end
     const double x =
         (x_back_cylinder + 0.005) +
@@ -728,7 +721,7 @@ NavierStokes2D::compute_pressure_difference() const
     { 
       // Linear interpolation to find the exact point xr where u_x = 0
       const double xr = x_prev - u_prev * (x - x_prev) / (u - u_prev); 
-      return xr - x_back_cylinder; // La = xr − x_back: recirculation bubble length
+      return xr - x_back_cylinder; 
     } 
 
     // advance to the next sampling point
@@ -739,9 +732,11 @@ NavierStokes2D::compute_pressure_difference() const
   // No sign change found: La is undefined (steady flow with no recirculation bubble)
   return std::numeric_limits<double>::quiet_NaN();
 }
+*/
+
 
 double
-NavierStokes2D::compute_reynolds_number() const
+NavierStokes3D::compute_reynolds_number() const
 {
   const double U = reference_velocity();
 
@@ -750,25 +745,34 @@ NavierStokes2D::compute_reynolds_number() const
 }
 
 double
-NavierStokes2D::compute_strouhal_number() const
+NavierStokes3D::compute_strouhal_number() const
 {
   // need at least a time history to work with
   if (cL_history.size() < 2)
     return std::numeric_limits<double>::quiet_NaN();
 
-  //std::vector<double> peak_times;
-
-  // Local maxima of cL(t) in the time history
-  double cL_max_val = 0.0;
+  // Determine the raw max and min of cL after the transient phase, and
+  // figure out which extremum has the larger magnitude. In 3D
+  // (circular cylinder), cL is nearly symmetric around zero and may be
+  // negatively biased.
+  double raw_max = -std::numeric_limits<double>::max();
+  double raw_min =  std::numeric_limits<double>::max();
 
   for (unsigned int i = 0; i < cL_history.size(); ++i)
     {
       if (time_history[i] < 4.0) continue; // skip transient phase (first 4 seconds)
-        cL_max_val = std::max(cL_max_val, std::abs(cL_history[i]));
+      raw_max = std::max(raw_max, cL_history[i]);
+      raw_min = std::min(raw_min, cL_history[i]);
     }
 
-  // Threshold for peak detection: 50% of the maximum absolute value of cL
-  const double threshold = 0.5 * cL_max_val;
+  const bool use_maxima = std::abs(raw_max) >= std::abs(raw_min);
+  const double extreme_val = use_maxima ? raw_max : -raw_min;
+
+  if (extreme_val <= 0.0)
+    return std::numeric_limits<double>::quiet_NaN();
+
+  // Threshold for peak detection: 50% of the dominant extremum's magnitude.
+  const double threshold = 0.5 * extreme_val;
 
   // Minimum time gap between consecutive peaks to avoid detecting small oscillations
   const double min_time_gap = 0.15; // seconds
@@ -776,13 +780,28 @@ NavierStokes2D::compute_strouhal_number() const
   std::vector<double> peak_times;
   double last_peak_time = -min_time_gap; // initialize to a time before the start
 
-  // Local maximum: cL[i] > cL[i-1]  and  cL[i] > cL[i+1]
   for (unsigned int i = 1; i + 1 < cL_history.size(); ++i)
     {
       if (time_history[i] < 4.0) continue; // skip transient phase (first 4 seconds)
-      if (cL_history[i] < threshold) continue; // skip small oscillations below threshold
-      if (cL_history[i] <= cL_history[i - 1] || cL_history[i] <= cL_history[i + 1]) continue; // not a local maximum
-      if (time_history[i] - last_peak_time < min_time_gap) continue; // too close to last peak
+      
+      bool is_peak = false;
+      if (use_maxima)
+        {
+          // Look for local maxima above +threshold.
+          is_peak = (cL_history[i] >= threshold) &&
+                    (cL_history[i] > cL_history[i - 1]) &&
+                    (cL_history[i] > cL_history[i + 1]);
+        }
+      else
+        {
+          // Look for local minima below -threshold.
+          is_peak = (cL_history[i] <= -threshold) &&
+                    (cL_history[i] < cL_history[i - 1]) &&
+                    (cL_history[i] < cL_history[i + 1]);
+        }
+
+      if (!is_peak) continue;
+      if (time_history[i] - last_peak_time < min_time_gap) continue;
       
       peak_times.push_back(time_history[i]);
       last_peak_time = time_history[i];
@@ -806,45 +825,9 @@ NavierStokes2D::compute_strouhal_number() const
   return D_cylinder * f / U;
 }
 
-double
-NavierStokes2D::compute_delta_p_at_half_period() const
-{
-  if (dP_history.empty() || cL_history.empty())
-    return std::numeric_limits<double>::quiet_NaN();
 
-  // Find t0 = time at which cL reaches its global maximum in the recorded history
-  const auto it_max = std::max_element(cL_history.begin(), cL_history.end());
-  const double t0   = time_history[std::distance(cL_history.begin(), it_max)];
-
-  // Compute the Strouhal number in order to derive the half-period
-  const double St = compute_strouhal_number();
-  if (std::isnan(St))
-    return std::numeric_limits<double>::quiet_NaN();
-
-  const double U           = reference_velocity();
-  // T/2 = D / (2 · St · U)   (half-period of the vortex shedding cycle)
-  const double half_period = D_cylinder / (2.0 * St * U);
-  // target instant = t0 + T/2
-  const double target      = t0 + half_period;
-
-  // Find the sample in the time history closest to the target instant
-  double best_dp   = std::numeric_limits<double>::quiet_NaN();
-  double best_dist = std::numeric_limits<double>::max();
-  for (unsigned int i = 0; i < time_history.size(); ++i)
-    {
-      const double d = std::abs(time_history[i] - target);
-      if (d < best_dist)
-        {
-          best_dist = d;  // update minimum distance
-          best_dp   = dP_history[i]; // store the corresponding ΔP value
-        }
-    }
-  return best_dp; // ΔP at the instant t0 + T/2
-}
-
-
-NavierStokes2D::BenchmarkResult
-NavierStokes2D::compute_benchmark_result() const
+NavierStokes3D::BenchmarkResult
+NavierStokes3D::compute_benchmark_result() const
 {
   BenchmarkResult r;
   r.Re = compute_reynolds_number();
@@ -853,19 +836,17 @@ NavierStokes2D::compute_benchmark_result() const
   {
     auto [drag, lift] = compute_drag_lift_forces();
     const double U    = reference_velocity();
-    const double fac  = 2.0 / (data.rho * U * U * D_cylinder);
+    const double fac  = 2.0 / (data.rho * U * U * D_cylinder * H_channel);  
 
     r.cD = fac * drag;
     r.cL = fac * lift;
     r.dP = compute_pressure_difference();
-    r.La = compute_recirculation_length();
   }
   else if (data.choice == 2)
   {
     r.cD_max  = cD_max;
     r.cL_max  = cL_max;
     r.St      = compute_strouhal_number();
-    r.dP_half = compute_delta_p_at_half_period();
   }
   else if (data.choice == 3)
   {
@@ -878,7 +859,7 @@ NavierStokes2D::compute_benchmark_result() const
 
 
 void
-NavierStokes2D::print_benchmark_quantities(const BenchmarkResult &res) const
+NavierStokes3D::print_benchmark_quantities(const BenchmarkResult &res) const
 {
   pcout << std::fixed << std::setprecision(4);
   pcout << "Benchmark quantities at t = " << time << '\n';
@@ -889,14 +870,12 @@ NavierStokes2D::print_benchmark_quantities(const BenchmarkResult &res) const
     pcout << "  cD = " << res.cD << '\n';
     pcout << "  cL = " << res.cL << '\n';
     pcout << "  ΔP = " << res.dP << '\n';
-    pcout << "  La = " << res.La << '\n';
   }
   else if (data.choice == 2)
   {
     pcout << "  cD_max     = " << res.cD_max  << '\n';
     pcout << "  cL_max     = " << res.cL_max  << '\n';
     pcout << "  St         = " << res.St      << '\n';
-    pcout << "  ΔP(t0+T/2) = " << res.dP_half << '\n'; 
   }
   else if (data.choice == 3)
   {
