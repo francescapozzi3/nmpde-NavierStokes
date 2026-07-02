@@ -1,5 +1,9 @@
 #include "NavierStokes2D.hpp"
 
+constexpr unsigned int PRECONDITIONER = 6;
+// 1 = BlockTriangular, 2 = Identity, 3 = BlockDiagonal, 4 = SIMPLE, 5 = Yosida, 6 = AS, 7 = PCD
+// 1, 6 working 
+
 void
 NavierStokes2D::setup()
 {
@@ -147,6 +151,8 @@ NavierStokes2D::setup()
     pcout << "  Initializing the matrices" << std::endl;
     system_matrix.reinit(sparsity);
     pressure_mass.reinit(sparsity_pressure_mass);
+    pressure_laplacian.reinit(sparsity_pressure_mass.block(1,1));
+    pressure_convection.reinit(sparsity_pressure_mass.block(1,1));
 
     pcout << "  Initializing the system right-hand side" << std::endl;
     system_rhs.reinit(block_owned_dofs, MPI_COMM_WORLD);
@@ -177,6 +183,8 @@ NavierStokes2D::assemble()
 
   FullMatrix<double> cell_matrix(dofs_per_cell, dofs_per_cell);
   FullMatrix<double> cell_pressure_mass_matrix(dofs_per_cell, dofs_per_cell);
+  FullMatrix<double> cell_pressure_laplacian(dofs_per_cell, dofs_per_cell);
+  FullMatrix<double> cell_pressure_convection(dofs_per_cell, dofs_per_cell);
   Vector<double>     cell_rhs(dofs_per_cell);
 
   std::vector<types::global_dof_index> dof_indices(dofs_per_cell);
@@ -184,6 +192,8 @@ NavierStokes2D::assemble()
   system_matrix = 0.0;
   system_rhs    = 0.0;
   pressure_mass = 0.0;
+  pressure_laplacian  = 0.0;
+  pressure_convection = 0.0;
 
   FEValuesExtractors::Vector velocity(0);
   FEValuesExtractors::Scalar pressure(dim);
@@ -255,9 +265,22 @@ NavierStokes2D::assemble()
                                                       fe_values[pressure].value(j, q) *
                                                       fe_values.JxW(q);
                 
+                  // Only for PCD preconditioner
+                  if (PRECONDITIONER == 7)
+                    {
+                      // Pressure Laplacian: (∇q, ∇p)
+                      cell_pressure_laplacian(i, j) += scalar_product(fe_values[pressure].gradient(i, q),
+                                                                      fe_values[pressure].gradient(j, q)) *
+                                                       fe_values.JxW(q);
+
+                      // Pressure Convection: (q, u_old · ∇p)
+                      cell_pressure_convection(i, j) += fe_values[pressure].value(i, q) *
+                                                        (solution_old_values[q] * fe_values[pressure].gradient(j, q)) *
+                                                        fe_values.JxW(q);
+                    }
                   }
 
-                 // Time derivative: (1/dt)(u^n, v)
+                  // Time derivative: (1/dt)(u^n, v)
                   cell_rhs(i) += (1.0 / delta_t) *             //
                              fe_values[velocity].value(i, q) * //
                              solution_old_values[q] *      //
@@ -315,11 +338,15 @@ NavierStokes2D::assemble()
       system_matrix.add(dof_indices, cell_matrix);
       system_rhs.add(dof_indices, cell_rhs);
       pressure_mass.add(dof_indices, cell_pressure_mass_matrix);
+      pressure_laplacian.add(dof_indices, cell_pressure_laplacian);
+      pressure_convection.add(dof_indices, cell_pressure_convection);
     }
 
   system_matrix.compress(VectorOperation::add);
   system_rhs.compress(VectorOperation::add);
   pressure_mass.compress(VectorOperation::add);
+  pressure_laplacian.compress(VectorOperation::add);
+  pressure_convection.compress(VectorOperation::add);
 
   // Dirichlet boundary conditions.
   {
@@ -352,19 +379,112 @@ NavierStokes2D::assemble()
 void
 NavierStokes2D::solve()
 {
-  //pcout << "===============================================" << std::endl;
-
   SolverControl solver_control(50000, 1e-4 * system_rhs.l2_norm());
   SolverFGMRES<TrilinosWrappers::MPI::BlockVector> solver(solver_control);
- 
- PreconditionBlockTriangular preconditioner;
-  preconditioner.initialize(system_matrix.block(0, 0),
-                            pressure_mass.block(1, 1),
-                            system_matrix.block(1, 0));
-  
+
+  if (PRECONDITIONER == 1) 
+  {
+    pcout << "  Using: PreconditionBlockTriangular" << std::endl;
+    auto concrete_prec = std::make_unique<NSPreconditioners::PreconditionBlockTriangular>();
+    concrete_prec->initialize(system_matrix.block(0, 0),
+                              pressure_mass.block(1, 1),
+                              system_matrix.block(1, 0));
+    advanced_preconditioner = std::move(concrete_prec);
+  }
+  else if (PRECONDITIONER == 2) 
+  {
+    pcout << "  Using: PreconditionIdentity" << std::endl;
+    advanced_preconditioner = std::make_unique<NSPreconditioners::PreconditionIdentity>();
+  }
+  else if (PRECONDITIONER == 3) 
+  {
+    pcout << "  Using: PreconditionBlockDiagonal" << std::endl;
+    auto concrete_prec = std::make_unique<NSPreconditioners::PreconditionBlockDiagonal>();
+    concrete_prec->initialize(system_matrix.block(0, 0), 
+                              pressure_mass.block(1, 1));
+    advanced_preconditioner = std::move(concrete_prec);
+  }
+  else if (PRECONDITIONER == 4) 
+  {
+    pcout << "   Using: PreconditionSIMPLE" << std::endl;
+    auto concrete_prec = std::make_unique<NSPreconditioners::PreconditionSIMPLE>();
+    
+    simple_inner_F = std::make_unique<TrilinosWrappers::PreconditionILU>();
+    dynamic_cast<TrilinosWrappers::PreconditionILU*>(simple_inner_F.get())->initialize(system_matrix.block(0, 0));
+    
+    simple_inner_S = std::make_unique<TrilinosWrappers::PreconditionILU>();
+    dynamic_cast<TrilinosWrappers::PreconditionILU*>(simple_inner_S.get())->initialize(pressure_mass.block(1, 1)); 
+
+    concrete_prec->initialize(system_matrix, *simple_inner_F, *simple_inner_S);
+    advanced_preconditioner = std::move(concrete_prec);
+  }
+  else if (PRECONDITIONER == 5) 
+  {
+    pcout << "  Using: PreconditionYosida" << std::endl;
+    auto concrete_prec = std::make_unique<NSPreconditioners::PreconditionYosida>();
+    
+    auto prec_F = std::make_unique<TrilinosWrappers::PreconditionILU>();
+    prec_F->initialize(system_matrix.block(0, 0));
+    auto prec_S = std::make_unique<TrilinosWrappers::PreconditionILU>();
+    prec_S->initialize(pressure_mass.block(1, 1)); 
+
+    concrete_prec->initialize(system_matrix, *prec_F, *prec_S);
+    advanced_preconditioner = std::move(concrete_prec);
+  }
+  else if (PRECONDITIONER == 6) 
+  {
+    pcout << "  Using: PreconditionAS (Additive Schwarz)" << std::endl;
+    auto concrete_prec = std::make_unique<NSPreconditioners::PreconditionAS>();
+    
+    // Configure the Ifpack overlapping Schwarz options
+    TrilinosWrappers::PreconditionILU::AdditionalData data;
+    data.overlap = 1;   // Level of algebraic/geometric overlap between parallel MPI subdomains
+
+    concrete_prec->initialize(system_matrix, pressure_mass.block(1, 1), data);
+    advanced_preconditioner = std::move(concrete_prec);
+  }
+  else if (PRECONDITIONER == 7) 
+  {
+    pcout << "  Using: PreconditionPCD" << std::endl;
+    auto concrete_prec = std::make_unique<NSPreconditioners::PreconditionPCD>();
+    
+    // 1. Setup ILU settings for Velocity (F) and Pressure Mass (Mp)
+    TrilinosWrappers::PreconditionILU::AdditionalData ilu_data;
+    ilu_data.overlap = 1; 
+
+    auto prec_F = std::make_unique<TrilinosWrappers::PreconditionILU>();
+    prec_F->initialize(system_matrix.block(0, 0), ilu_data);
+
+    auto prec_Mp = std::make_unique<TrilinosWrappers::PreconditionILU>();
+    prec_Mp->initialize(pressure_mass.block(0, 0), ilu_data);
+
+    // 2. Setup SSOR settings for the Pressure Laplacian (Ap) to avoid zero-pivots
+    TrilinosWrappers::PreconditionSSOR::AdditionalData ssor_data;
+    ssor_data.omega = 1.2; // Damping/relaxation factor
+
+    auto prec_Ap = std::make_unique<TrilinosWrappers::PreconditionSSOR>();
+    prec_Ap->initialize(pressure_laplacian, ssor_data); 
+
+    // 3. Initialize the main PCD wrapper class
+    concrete_prec->initialize(system_matrix, *prec_F, *prec_Mp, *prec_Ap, pressure_convection);
+    
+    // 4. Move ownership to class-level member variables to preserve memory lifetime
+    this->pcd_inner_F  = std::move(prec_F);
+    this->pcd_inner_Mp = std::move(prec_Mp);
+    this->pcd_inner_Ap = std::move(prec_Ap);
+
+    // 5. Hand over the fully initialized PCD wrapper to the main block manager
+    advanced_preconditioner = std::move(concrete_prec);
+  }
+
+
+  pcout << "DEBUG: Matrix size: " << system_matrix.m() << std::endl;
+  pcout << "DEBUG: RHS L2 Norm: " << system_rhs.l2_norm() << std::endl;
+  pcout << "DEBUG: Solution L2 Norm (before solve): " << solution.l2_norm() << std::endl;
 
   pcout << "  Solving the linear system" << std::endl;
-  solver.solve(system_matrix, solution_owned, system_rhs, preconditioner);
+  solver.solve(system_matrix, solution_owned, system_rhs, *advanced_preconditioner);
+  
   pcout << "  " << solver_control.last_step() << " FGMRES iterations\n"
         << std::endl;
 
