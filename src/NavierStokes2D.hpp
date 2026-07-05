@@ -258,10 +258,6 @@ protected:
   // Velocity mass matrix for Yosida preconditioner.
   TrilinosWrappers::BlockSparseMatrix velocity_mass;
 
-  // Pressure laplacian and pressure convection for PCD preconditioner.
-  TrilinosWrappers::BlockSparseMatrix pressure_laplacian; 
-  TrilinosWrappers::BlockSparseMatrix pressure_convection;
-
   // Base pointer for managing any block preconditioner. 
   std::unique_ptr<NSPreconditioners::NavierStokesPreconditionerBase> advanced_preconditioner;
 
