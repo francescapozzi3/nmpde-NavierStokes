@@ -500,7 +500,8 @@ NavierStokes2D::solve()
                               pressure_convection.block(1,1),
                               pressure_mass.block(1, 1),
                               data.nu,
-                              delta_t);
+                              delta_t,
+                              theta);
     advanced_preconditioner = std::move(concrete_prec);
   }
 
@@ -566,9 +567,14 @@ NavierStokes2D::run()
 
   pcout << "\n===============================================" << std::endl;
 
+  // Vector to store the wall-clock time taken by each timestep.
+  std::vector<double> timestep_wall_times;
+
   // Time-stepping loop.
   while (time < T - 0.5 * delta_t)  // Avoid round-off errors.
     {
+      Timer timestep_timer;
+
       time += delta_t;
       ++timestep_number;
 
@@ -621,6 +627,26 @@ NavierStokes2D::run()
 
       //output();
 
+      // Stop the timer and take the maximum wall time across all MPI ranks
+      timestep_timer.stop();
+      const double timestep_wall_time =
+        Utilities::MPI::max(timestep_timer.wall_time(), MPI_COMM_WORLD);
+ 
+      timestep_wall_times.push_back(timestep_wall_time);
+ 
+      pcout << "  Timestep wall time: " << std::fixed << std::setprecision(4)
+            << timestep_wall_time << " s" << std::endl;
+
+    }
+ 
+  // Export the per-timestep wall time to a CSV file, so it can be
+  // plotted or compared across different preconditioners/mesh sizes.
+  if (Utilities::MPI::this_mpi_process(MPI_COMM_WORLD) == 0)
+    {
+      std::ofstream timing_out("timestep_timings.csv");
+      timing_out << "timestep,wall_time_s\n";
+      for (unsigned int i = 0; i < timestep_wall_times.size(); ++i)
+        timing_out << (i + 1) << "," << timestep_wall_times[i] << "\n";
     }
  
   // Computation

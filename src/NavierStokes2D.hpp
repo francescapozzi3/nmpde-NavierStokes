@@ -1,11 +1,16 @@
 #ifndef NAVIER_STOKES_2D_HPP
 #define NAVIER_STOKES_2D_HPP
 
-# include "preconditioners.hpp"
+#include "preconditioners.hpp"
 
 #include <limits>
 #include <utility>
 #include <cmath>
+#include <numeric>
+#include <algorithm>
+#include <fstream>
+
+#include <deal.II/base/timer.h>
 
 #include <deal.II/base/conditional_ostream.h>
 #include <deal.II/base/quadrature_lib.h>

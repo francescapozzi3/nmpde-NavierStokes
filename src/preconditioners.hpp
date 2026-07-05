@@ -383,6 +383,7 @@ namespace NSPreconditioners {
             // Mp_       : pressure_mass.block(1,1)
             // nu_       : kinematic viscosity
             // dt_       : current timestep
+            // theta_    : time-stepping parameter (0 <= theta <= 1)
 
             // Initialize the preconditioner:
             void
@@ -393,7 +394,8 @@ namespace NSPreconditioners {
                        const TrilinosWrappers::SparseMatrix &Cp_,
                        const TrilinosWrappers::SparseMatrix &Mp_,
                        const double                          nu_,
-                       const double                          dt_)
+                       const double                          dt_,
+                       const double                          theta_)
             {
                 F  = &F_;
                 B  = &B_;
@@ -404,8 +406,8 @@ namespace NSPreconditioners {
                 // Assemble Fp = (1/dt) Mp + nu * Ap + Cp
                 Fp_matrix.copy_from(Mp_);
                 Fp_matrix *= 1.0 / dt_;
-                Fp_matrix.add(nu_, Ap_);
-                Fp_matrix.add(1.0, Cp_);
+                Fp_matrix.add(theta_ * nu_, Ap_);
+                Fp_matrix.add(theta_, Cp_);
                 Fp = &Fp_matrix;
 
                 preconditioner_F.initialize(F_);
