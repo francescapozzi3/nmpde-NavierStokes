@@ -426,7 +426,7 @@ NavierStokes3D::solve()
 
   pcout << "  Solving the linear system" << std::endl;
   solver.solve(system_matrix, solution_owned, system_rhs, *advanced_preconditioner);
-  pcout << "  " << solver_control.last_step() << " FGMRES iterations"
+  pcout << "  " << (solver_control.last_step()+1) << " FGMRES iterations"
         << std::endl;
 
   solution = solution_owned;
@@ -539,17 +539,20 @@ NavierStokes3D::run()
         }
       }
 
-      //output();
+      if (timestep_number % 10 == 0)
+      { 
+        output();
+      }
 
-        // Stop the timer and take the maximum wall time across all MPI ranks
-        timestep_timer.stop();
-        const double timestep_wall_time =
-          Utilities::MPI::max(timestep_timer.wall_time(), MPI_COMM_WORLD);
+      // Stop the timer and take the maximum wall time across all MPI ranks
+      timestep_timer.stop();
+      const double timestep_wall_time =
+        Utilities::MPI::max(timestep_timer.wall_time(), MPI_COMM_WORLD);
   
-        timestep_wall_times.push_back(timestep_wall_time);
+      timestep_wall_times.push_back(timestep_wall_time);
   
-        pcout << "  Timestep wall time: " << std::fixed << std::setprecision(4)
-              << timestep_wall_time << " s\n" << std::endl;
+      pcout << "  Timestep wall time: " << std::fixed << std::setprecision(4)
+            << timestep_wall_time << " s\n" << std::endl;
 
     }
   
@@ -561,11 +564,6 @@ NavierStokes3D::run()
       timing_out << "timestep,wall_time_s\n";
       for (unsigned int i = 0; i < timestep_wall_times.size(); ++i)
         timing_out << (i + 1) << "," << timestep_wall_times[i] << "\n";
-    }
-
-  if (timestep_number % 10 == 0)
-    { 
-      output();
     }
  
   // Computation

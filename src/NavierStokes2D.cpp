@@ -425,7 +425,7 @@ NavierStokes2D::solve()
 
   pcout << "  Solving the linear system" << std::endl;
   solver.solve(system_matrix, solution_owned, system_rhs, *advanced_preconditioner);
-  pcout << "  " << solver_control.last_step() << " FGMRES iterations"
+  pcout << "  " << (solver_control.last_step()+1) << " FGMRES iterations"
         << std::endl;
 
   solution = solution_owned;
@@ -538,7 +538,10 @@ NavierStokes2D::run()
         }
       }
 
-      //output();
+      if (timestep_number % 10 == 0)
+      { 
+        output();
+      }
 
       // Stop the timer and take the maximum wall time across all MPI ranks
       timestep_timer.stop();
@@ -560,11 +563,6 @@ NavierStokes2D::run()
       timing_out << "timestep,wall_time_s\n";
       for (unsigned int i = 0; i < timestep_wall_times.size(); ++i)
         timing_out << (i + 1) << "," << timestep_wall_times[i] << "\n";
-    }
-
-  if (timestep_number % 10 == 0)
-    { 
-      output();
     }
  
   // Computation
