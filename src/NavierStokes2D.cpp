@@ -1,7 +1,7 @@
 #include "NavierStokes2D.hpp"
 
 constexpr unsigned int PRECONDITIONER = 4;
-// 1 = Identity, 2 = BlockTriangular, 3 = BlockDiagonal, 4 = SIMPLE, 5 = Yosida, 6 = PCD
+// 1 = Identity, 2 = BlockTriangular, 3 = BlockDiagonal, 4 = SIMPLE, 5 = Yosida
 
 void
 NavierStokes2D::setup()
@@ -421,21 +421,6 @@ NavierStokes2D::solve()
                                solution_owned, 
                                delta_t);                    
   advanced_preconditioner = std::move(concrete_prec);
-  }
-  else if (PRECONDITIONER == 6)
-  {
-    pcout << "  Using: PreconditionPCD" << std::endl;
-    auto concrete_prec = std::make_unique<NSPreconditioners::PreconditionPCD>();
-    concrete_prec->initialize(system_matrix.block(0, 0),
-                              system_matrix.block(1, 0),
-                              system_matrix.block(0, 1),
-                              pressure_laplacian.block(1,1),
-                              pressure_convection.block(1,1),
-                              pressure_mass.block(1, 1),
-                              data.nu,
-                              delta_t,
-                              theta);
-    advanced_preconditioner = std::move(concrete_prec);
   }
 
   pcout << "  Solving the linear system" << std::endl;
