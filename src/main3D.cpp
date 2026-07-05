@@ -130,13 +130,13 @@ main(int argc, char *argv[])
   // Broadcast the choice to all MPI processes
   choice = Utilities::MPI::broadcast(MPI_COMM_WORLD, choice, 0);
 
-  const std::string  mesh_file_name  = "../mesh/mesh-3D-cylinder-circular-cs-0.0205.msh";
+  const std::string  mesh_file_name  = "../mesh/mesh-3D-cylinder-circular-cs-0.0410.msh";
   const unsigned int degree_velocity = 2;
   const unsigned int degree_pressure = 1;
   
   const double T = 8.0;
   const double theta = 1.0;
-  const double delta_t = 0.05;
+  const double delta_t = 0.01;
 
   auto fdata = make_problem_data(choice);
 

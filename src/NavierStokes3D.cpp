@@ -1,6 +1,6 @@
 #include "NavierStokes3D.hpp"
 
-constexpr unsigned int PRECONDITIONER = 4;
+constexpr unsigned int PRECONDITIONER = 5;
 // 1 = Identity, 2 = BlockTriangular, 3 = BlockDiagonal, 4 = SIMPLE, 5 = Yosida, 6 = PCD
 
 void
@@ -469,7 +469,7 @@ NavierStokes3D::solve()
   }
   else if (PRECONDITIONER == 4) 
   {
-    pcout << "   Using: PreconditionSIMPLE" << std::endl;
+    pcout << "  Using: PreconditionSIMPLE" << std::endl;
     auto concrete_prec = std::make_unique<NSPreconditioners::PreconditionSIMPLE>();
     concrete_prec->initialize(system_matrix.block(0, 0),
                               system_matrix.block(0, 1),
@@ -508,7 +508,7 @@ NavierStokes3D::solve()
 
   pcout << "  Solving the linear system" << std::endl;
   solver.solve(system_matrix, solution_owned, system_rhs, *advanced_preconditioner);
-  pcout << "  " << solver_control.last_step() << " FGMRES iterations\n"
+  pcout << "  " << solver_control.last_step() << " FGMRES iterations"
         << std::endl;
 
   solution = solution_owned;
@@ -590,11 +590,6 @@ NavierStokes3D::run()
       // solution vector.
       solution = solution_owned;
 
-       if (timestep_number % 10 == 0)
-        { 
-          output();
-        }
-
         if (data.choice == 2 || data.choice == 3)
       {
         const auto [drag, lift] = compute_drag_lift_forces();
@@ -636,7 +631,7 @@ NavierStokes3D::run()
         timestep_wall_times.push_back(timestep_wall_time);
   
         pcout << "  Timestep wall time: " << std::fixed << std::setprecision(4)
-              << timestep_wall_time << " s" << std::endl;
+              << timestep_wall_time << " s\n" << std::endl;
 
     }
   
@@ -648,6 +643,11 @@ NavierStokes3D::run()
       timing_out << "timestep,wall_time_s\n";
       for (unsigned int i = 0; i < timestep_wall_times.size(); ++i)
         timing_out << (i + 1) << "," << timestep_wall_times[i] << "\n";
+    }
+
+  if (timestep_number % 10 == 0)
+    { 
+      output();
     }
  
   // Computation

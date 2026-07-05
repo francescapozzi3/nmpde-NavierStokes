@@ -207,6 +207,8 @@ namespace NSPreconditioners {
                 D_inv[i] = 1.0 / F_.diag_element(i);
             D_inv.compress(VectorOperation::insert);
 
+            S.clear();
+
             // Explicitly build the approximate (pseudo-Laplacian) Schur complement
             B_.mmult(S, *Bt, D_inv);
 
@@ -304,6 +306,8 @@ namespace NSPreconditioners {
                     Dmu_inv[i] = 1.0 / lumped;
                 }
                 Dmu_inv.compress(VectorOperation::insert);
+
+                schur_matrix.clear();
 
                 // Build positive-definite Schur complement S = dt * B * D_Mu^-1 * B^T
                 B_.mmult(schur_matrix, *Bt, Dmu_inv);
