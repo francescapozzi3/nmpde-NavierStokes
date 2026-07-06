@@ -172,13 +172,13 @@ namespace NSPreconditioners {
     };
 
 
-    // Implementation of the SIMPLE preconditioner
-    //   P_SIMPLE = [ F   0  ] [ I   D^-1 B^T ]
-    //              [ B  -S~ ] [ 0   alpha I  ]
+    // Implementation of the aSIMPLE preconditioner
+    //   P_aSIMPLE = [ F   0  ] [ I   D^-1 B^T ]
+    //               [ B  -S~ ] [ 0   alpha I  ]
     // with D = diag(F), S~ = B D^-1 B^T
-    class PreconditionSIMPLE : public NavierStokesPreconditionerBase {
+    class PreconditionaSIMPLE : public NavierStokesPreconditionerBase {
         public:
-            PreconditionSIMPLE() = default;
+            PreconditionaSIMPLE() = default;
 
             // F_       : system_matrix.block(0,0)
             // Bt_      : system_matrix.block(0,1)   (this is B^T)
@@ -264,13 +264,13 @@ namespace NSPreconditioners {
     };
 
 
-    // Implementation of the Yosida preconditioner
-    //   P_Y = [ F   0  ] [ I   F^-1 B^T ]
-    //         [ B  -S~ ] [ 0     I      ]
+    // Implementation of the aYosida preconditioner
+    //   P_aY = [ F   0  ] [ I   F^-1 B^T ]
+    //          [ B  -S~ ] [ 0     I      ]
     // with  S~ = Delta_t * B * diag(M_u)^-1 * B^T
-    class PreconditionYosida : public NavierStokesPreconditionerBase {
+    class PreconditionaYosida : public NavierStokesPreconditionerBase {
         public:
-            PreconditionYosida() = default;
+            PreconditionaYosida() = default;
 
             // F_            : system_matrix.block(0,0)
             // Bt_           : system_matrix.block(0,1)

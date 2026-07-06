@@ -1,7 +1,7 @@
 #include "NavierStokes2D.hpp"
 
 constexpr unsigned int PRECONDITIONER = 4;
-// 1 = Identity, 2 = BlockTriangular, 3 = BlockDiagonal, 4 = SIMPLE, 5 = Yosida
+// 1 = Identity, 2 = BlockTriangular, 3 = BlockDiagonal, 4 = aSIMPLE, 5 = aYosida
 
 void
 NavierStokes2D::setup()
@@ -379,12 +379,12 @@ NavierStokes2D::solve()
  
   if (PRECONDITIONER == 1) 
   {
-    pcout << "  Using: PreconditionIdentity" << std::endl;
+    pcout << "  Using: Identity preconditioner" << std::endl;
     advanced_preconditioner = std::make_unique<NSPreconditioners::PreconditionIdentity>();
   }
   else if (PRECONDITIONER == 2) 
   {
-    pcout << "  Using: PreconditionBlockTriangular" << std::endl;
+    pcout << "  Using: Block Triangular preconditioner" << std::endl;
     auto concrete_prec = std::make_unique<NSPreconditioners::PreconditionBlockTriangular>();
     concrete_prec->initialize(system_matrix.block(0, 0),
                               pressure_mass.block(1, 1),
@@ -393,7 +393,7 @@ NavierStokes2D::solve()
   }
   else if (PRECONDITIONER == 3) 
   {
-    pcout << "  Using: PreconditionBlockDiagonal" << std::endl;
+    pcout << "  Using: Block Diagonal preconditioner" << std::endl;
     auto concrete_prec = std::make_unique<NSPreconditioners::PreconditionBlockDiagonal>();
     concrete_prec->initialize(system_matrix.block(0, 0), 
                               pressure_mass.block(1, 1));
@@ -401,8 +401,8 @@ NavierStokes2D::solve()
   }
   else if (PRECONDITIONER == 4) 
   {
-    pcout << "  Using: PreconditionSIMPLE" << std::endl;
-    auto concrete_prec = std::make_unique<NSPreconditioners::PreconditionSIMPLE>();
+    pcout << "  Using: aSIMPLE preconditioner" << std::endl;
+    auto concrete_prec = std::make_unique<NSPreconditioners::PreconditionaSIMPLE>();
     concrete_prec->initialize(system_matrix.block(0, 0),
                               system_matrix.block(0, 1),
                               system_matrix.block(1, 0),
@@ -412,8 +412,8 @@ NavierStokes2D::solve()
   }
   else if (PRECONDITIONER == 5) 
   {
-    pcout << "  Using: PreconditionYosida" << std::endl;
-    auto concrete_prec = std::make_unique<NSPreconditioners::PreconditionYosida>();
+    pcout << "  Using: aYosida preconditioner" << std::endl;
+    auto concrete_prec = std::make_unique<NSPreconditioners::PreconditionaYosida>();
     concrete_prec->initialize(system_matrix.block(0, 0),
                                system_matrix.block(0, 1),
                                system_matrix.block(1, 0),
