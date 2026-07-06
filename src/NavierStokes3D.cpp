@@ -426,7 +426,7 @@ NavierStokes3D::solve()
 
   pcout << "  Solving the linear system" << std::endl;
   solver.solve(system_matrix, solution_owned, system_rhs, *advanced_preconditioner);
-  pcout << "  " << (solver_control.last_step()+1) << " FGMRES iterations"
+  pcout << "   " << (solver_control.last_step()+1) << "  FGMRES iteration(s)"
         << std::endl;
 
   solution = solution_owned;
@@ -435,7 +435,7 @@ NavierStokes3D::solve()
 void
 NavierStokes3D::output()
 {
-  pcout << "===============================================" << std::endl;
+  pcout << "\n===============================================" << std::endl;
 
   DataOut<dim> data_out;
 
