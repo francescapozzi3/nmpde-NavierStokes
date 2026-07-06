@@ -596,7 +596,7 @@ NavierStokes3D::run()
     // Time series 
     if (data.choice == 2)
     {
-      std::ofstream out("time_series_2D2.csv");
+      std::ofstream out("time_series_3D2.csv");
       out << "time,cD,cL\n";
       for (unsigned int i = 0; i < time_history.size(); ++i)
         out << time_history[i] << "," << cD_history[i] << ","
