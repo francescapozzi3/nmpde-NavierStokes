@@ -136,7 +136,7 @@ main(int argc, char *argv[])
   
   const double T = 8.0;
   const double theta = 1.0;
-  const double delta_t = 0.005;
+  const double delta_t = 0.01;
 
   auto fdata = make_problem_data(choice);
 

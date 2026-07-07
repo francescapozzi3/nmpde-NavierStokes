@@ -1,5 +1,5 @@
 **Numerical Methods for Partial Differential Equations**  
-A.Y. 2025/2026
+Politecnico di Milano, A.Y. 2025/2026
 
 Authors:
 - Micaela Perlini, 10860443
