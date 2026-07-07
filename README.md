@@ -60,25 +60,27 @@ $ cd build
 $ cmake ..
 $ make
 ```
-The executables will be created into `build/`, and can be executed through:
+The executables will be created into `build/`. Based on the  problem desired to solve:
 
- * ```bash
+ * Use
+    ```bash
     $ ./main2D
     ```
     or
     ```bash
     $ mpirun -n <NPROC> ./main2D
     ```
-    if the desired test cases to run refer to 2D M. Schäfer and S. Turek benchmark.
+    if the test cases to run refer to 2D M. Schäfer and S. Turek benchmark.
 
- * ```bash
+ * Use
+    ```bash
     $ ./main3D
     ```
     or
     ```bash
     $ mpirun -n <NPROC> ./main3D
     ```
-    if the desired test cases to run refer to 3D M. Schäfer and S. Turek benchmark.
+    if the test cases to run refer to 3D M. Schäfer and S. Turek benchmark.
 
 
 
