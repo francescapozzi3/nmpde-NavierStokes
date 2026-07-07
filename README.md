@@ -62,7 +62,7 @@ $ make
 ```
 The executables will be created into `build/`, and can be executed through:
 
- -  ```bash
+ * ```bash
     $ ./main2D
     ```
     or
@@ -71,7 +71,7 @@ The executables will be created into `build/`, and can be executed through:
     ```
     if the desired test cases to run refer to 2D M. Schäfer and S. Turek benchmark.
 
- -  ```bash
+ * ```bash
     $ ./main3D
     ```
     or
