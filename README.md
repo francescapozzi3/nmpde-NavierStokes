@@ -13,11 +13,14 @@ Authors:
 This project solves, by means of the *finite element method*, the unsteady, incompressible Navier–Stokes equations to simulate the benchmark problem "flow past a cylinder" by M. Schäfer and S. Turek for different values of the Reynolds number $Re \le 200$, together with the computation of the drag and lift coefficients acting on the obstacle over
 time.
 
+More information about the problem, the discretization, the methods employed, and the results can be found in the project [report](NMPDE_NavierStokes_Project_Report_PerliniPozziRusconi.pdf).
+
 ## Repository structure
 
 ```text
 .
 ├── CMakeLists.txt
+├── NMPDE_NavierStokes_Project_Report_PerliniPozziRusconi.pdf
 ├── README.md
 ├── common
 │   └── cmake-common.cmake
